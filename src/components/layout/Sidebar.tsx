@@ -18,9 +18,14 @@ const links = [
   { href: '/admin/dashboard/documentos', label: '📄 Documentos' },
   { href: '/admin/dashboard/archivos', label: '📎 Archivos' },
   { href: '/admin/dashboard/medidas', label: '🛠️ Medidas Correctivas' },
+  { href: '/admin/dashboard/formularios', label: '📝 Formularios' },
   { href: '/admin/dashboard/firmas', label: '✍️ Firmas Digitales' },
+  { href: '/admin/dashboard/testigos', label: '🧾 Testigos' },
+  { href: '/admin/dashboard/estadisticas', label: '📊 Estadísticas' },
+  { href: '/admin/dashboard/historial', label: '📜 Historial de Cambios' }, 
   { href: '/admin/dashboard/configuracion', label: '⚙️ Configuración' },
 ];
+
 
 export default function Sidebar() {
   const pathname = usePathname();

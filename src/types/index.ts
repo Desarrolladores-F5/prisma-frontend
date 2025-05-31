@@ -187,3 +187,17 @@ export interface ProtocoloExtendido {
   empresa?: Empresa;
   faena?: Faena;
 }
+
+export interface HistorialCambio {
+  id: number;
+  entidad_tipo: string;
+  entidad_id: number;
+  accion: string;
+  detalles: any;
+  usuario_id: number;
+  timestamp: string;
+  usuario?: {
+    id: number;
+    nombre: string;
+  };
+}

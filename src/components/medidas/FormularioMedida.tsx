@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useSession } from 'next-auth/react';
 import { crearMedida, actualizarMedida, obtenerUsuarios, obtenerDocumentos } from '@/lib/api';
 
 export interface MedidaCorrectiva {
@@ -32,6 +33,9 @@ export default function FormularioMedida({ medida, onGuardado }: Props) {
   const [documentos, setDocumentos] = useState<any[]>([]);
   const [mensaje, setMensaje] = useState('');
 
+  const { data: session } = useSession();
+  const usuarioId = session?.user?.id;
+
   useEffect(() => {
     if (medida) setFormulario(medida);
 
@@ -54,12 +58,23 @@ export default function FormularioMedida({ medida, onGuardado }: Props) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!usuarioId) {
+      setMensaje('❌ No se puede guardar: usuario no autenticado');
+      return;
+    }
+
+    const datosConUsuario = {
+      ...formulario,
+      usuario_id: usuarioId,
+    };
+
     try {
       if (medida?.id) {
-        await actualizarMedida(medida.id, formulario);
+        await actualizarMedida(medida.id, datosConUsuario);
         setMensaje('✅ Medida actualizada correctamente');
       } else {
-        await crearMedida(formulario);
+        await crearMedida(datosConUsuario);
         setMensaje('✅ Medida creada correctamente');
         setFormulario({
           descripcion: '',

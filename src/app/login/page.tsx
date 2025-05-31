@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { signIn, useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 
 export default function LoginPage() {
@@ -11,6 +12,9 @@ export default function LoginPage() {
   const [error, setError] = useState('');
   const router = useRouter();
 
+  const { data: session, status } = useSession();
+
+  // Mensaje de bienvenida dinámico
   useEffect(() => {
     const hora = new Date().getHours();
     if (hora >= 6 && hora < 12) {
@@ -22,43 +26,40 @@ export default function LoginPage() {
     }
   }, []);
 
+  // Redirección automática por rol
+  useEffect(() => {
+    if (status === 'authenticated' && session?.user?.rol_id) {
+      switch (session.user.rol_id) {
+        case 1:
+          router.push('/admin/dashboard');
+          break;
+        case 2:
+          router.push('/supervisor/dashboard');
+          break;
+        case 3:
+          router.push('/trabajador/dashboard');
+          break;
+        default:
+          router.push('/acceso-denegado');
+      }
+    }
+  }, [status, session, router]);
+
+  // Manejo de login
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
 
-    const res = await fetch('http://localhost:3001/api/auth/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ correo, contraseña }),
+    const res = await signIn('credentials', {
+      redirect: false,
+      correo,
+      contraseña,
     });
 
-    const data = await res.json();
-
-    if (res.ok) {
-      localStorage.setItem('token', data.token);
-
-      try {
-        const payload = JSON.parse(atob(data.token.split('.')[1]));
-        const rol_id = payload.rol_id;
-
-        switch (rol_id) {
-          case 1:
-            router.push('/admin/dashboard');
-            break;
-          case 2:
-            router.push('/supervisor/dashboard');
-            break;
-          case 3:
-            router.push('/trabajador/dashboard');
-            break;
-          default:
-            setError('Rol no reconocido');
-        }
-      } catch (error) {
-        setError('Token inválido');
-      }
+    if (res?.ok) {
+      // Autenticación exitosa, espera a que useSession detecte el cambio
     } else {
-      setError(data.mensaje || 'Error de autenticación');
+      setError('❌ Credenciales inválidas o error en el servidor');
     }
   };
 

@@ -1,14 +1,17 @@
-const API_BASE = process.env.NEXT_PUBLIC_API_URL + '/api';
+// src/lib/api.ts
+const API_BASE = `${process.env.NEXT_PUBLIC_API_URL}/api`;
 
-const getToken = () => localStorage.getItem('token');
+const getToken = () => (typeof window !== 'undefined' ? localStorage.getItem('token') : null);
 
 async function handleFetch<T>(url: string, options: RequestInit = {}): Promise<T> {
+  const token = getToken();
+
   try {
     const res = await fetch(url, {
       ...options,
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${getToken()}`,
+        ...(token && { Authorization: `Bearer ${token}` }),
         ...options.headers,
       },
     });
@@ -109,6 +112,74 @@ export const crearArchivoAdjunto = (data: any) =>
 export const eliminarArchivoAdjunto = (id: number) =>
   handleFetch<any>(`${API_BASE}/archivos/${id}`, { method: 'DELETE' });
 
+// --- FORMULARIOS ---
+export const obtenerFormularios = () => handleFetch<any[]>(`${API_BASE}/formularios`);
+export const crearFormulario = (data: any) =>
+  handleFetch<any>(`${API_BASE}/formularios`, {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+export const actualizarFormulario = (id: number, data: any) =>
+  handleFetch<any>(`${API_BASE}/formularios/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  });
+export const eliminarFormulario = (id: number) =>
+  handleFetch<any>(`${API_BASE}/formularios/${id}`, {
+    method: 'DELETE',
+  });
+
+// --- RESPUESTAS DE FORMULARIO ---
+export const enviarRespuestaFormulario = (data: any) =>
+  handleFetch<any>(`${API_BASE}/respuestas-formulario`, {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+
+// --- TESTIGOS ---
+export const obtenerTestigos = () => handleFetch<any[]>(`${API_BASE}/testigos`);
+export const crearTestigo = (data: any) =>
+  handleFetch<any>(`${API_BASE}/testigos`, {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+export const actualizarTestigo = (id: number, data: any) =>
+  handleFetch<any>(`${API_BASE}/testigos/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  });
+export const eliminarTestigo = (id: number) =>
+  handleFetch<any>(`${API_BASE}/testigos/${id}`, {
+    method: 'DELETE',
+  });
+
+// --- ESTADÍSTICAS ---
+export const obtenerEstadisticas = () => handleFetch<any[]>(`${API_BASE}/estadisticas`);
+export const crearEstadistica = (data: any) =>
+  handleFetch<any>(`${API_BASE}/estadisticas`, {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+export const actualizarEstadistica = (id: number, data: any) =>
+  handleFetch<any>(`${API_BASE}/estadisticas/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  });
+export const eliminarEstadistica = (id: number) =>
+  handleFetch<any>(`${API_BASE}/estadisticas/${id}`, {
+    method: 'DELETE',
+  });
+
+// --- HISTORIAL DE CAMBIOS ---
+export const obtenerHistorialCambios = () =>
+  handleFetch<any[]>(`${API_BASE}/historial-cambios`);
+
+export const crearHistorialCambio = (data: any) =>
+  handleFetch<any>(`${API_BASE}/historial-cambios`, {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+
 // --- TOTALES (Estadísticas) ---
 export async function obtenerTotalReportesActivos(): Promise<number> {
   const reportes = await obtenerReportes();
@@ -149,3 +220,4 @@ export async function obtenerTotalNotificaciones(): Promise<number> {
   const notificaciones = await obtenerNotificaciones();
   return notificaciones.filter((n: any) => n.activo !== false).length;
 }
+
