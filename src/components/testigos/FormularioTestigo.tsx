@@ -1,12 +1,15 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useSession } from 'next-auth/react';
 import {
   crearTestigo,
   actualizarTestigo,
   obtenerEmpresas,
   obtenerReportes,
 } from '@/lib/api';
+import { registrarCambioHistorial } from '@/lib/registrarCambio';
+import HistorialCambios from '@/components/historial/HistorialCambios';
 
 interface Testigo {
   id?: number;
@@ -26,6 +29,9 @@ interface Props {
 }
 
 export default function FormularioTestigo({ testigo, onGuardado }: Props) {
+  const { data: session } = useSession();
+  const usuarioId = session?.user?.id;
+
   const [formulario, setFormulario] = useState<Testigo>({
     nombre: '',
     apellido: '',
@@ -73,6 +79,16 @@ export default function FormularioTestigo({ testigo, onGuardado }: Props) {
       if (testigo?.id) {
         await actualizarTestigo(testigo.id, formulario);
         setMensaje('✅ Testigo actualizado correctamente');
+
+        if (usuarioId) {
+          await registrarCambioHistorial({
+            usuario_id: usuarioId,
+            entidad: 'testigo',
+            entidad_id: testigo.id,
+            accion: 'edición',
+            detalles: formulario,
+          });
+        }
       } else {
         await crearTestigo(formulario);
         setMensaje('✅ Testigo registrado correctamente');
@@ -95,43 +111,51 @@ export default function FormularioTestigo({ testigo, onGuardado }: Props) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
-      {mensaje && (
-        <p className="md:col-span-2 text-sm text-blue-600 bg-blue-100 p-2 rounded border border-blue-300">
-          {mensaje}
-        </p>
+    <div>
+      <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {mensaje && (
+          <p className="md:col-span-2 text-sm text-blue-600 bg-blue-100 p-2 rounded border border-blue-300">
+            {mensaje}
+          </p>
+        )}
+
+        <input name="nombre" value={formulario.nombre} onChange={handleChange} placeholder="Nombre" required className="border p-2 rounded" />
+        <input name="apellido" value={formulario.apellido} onChange={handleChange} placeholder="Apellido" required className="border p-2 rounded" />
+        <input name="rut" value={formulario.rut} onChange={handleChange} placeholder="RUT" required className="border p-2 rounded" />
+        <input name="correo" value={formulario.correo || ''} onChange={handleChange} placeholder="Correo" type="email" className="border p-2 rounded" />
+        <input name="telefono" value={formulario.telefono || ''} onChange={handleChange} placeholder="Teléfono" className="border p-2 rounded" />
+
+        <select name="empresa_id" value={formulario.empresa_id || ''} onChange={handleChange} className="border p-2 rounded">
+          <option value="">Empresa (opcional)</option>
+          {empresas.map((e) => (
+            <option key={e.id} value={e.id}>{e.nombre}</option>
+          ))}
+        </select>
+
+        <select name="reporte_id" value={formulario.reporte_id} onChange={handleChange} required className="border p-2 rounded">
+          <option value="">Seleccione Reporte</option>
+          {reportes.map((r) => (
+            <option key={r.id} value={r.id}>{r.titulo}</option>
+          ))}
+        </select>
+
+        <div className="md:col-span-2">
+          <label className="block font-medium mb-1">Declaración</label>
+          <textarea name="declaracion" value={formulario.declaracion || ''} onChange={handleChange} className="w-full border p-2 rounded" />
+        </div>
+
+        <div className="md:col-span-2 flex justify-end">
+          <button type="submit" className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700">
+            {testigo ? 'Actualizar' : 'Registrar'} Testigo
+          </button>
+        </div>
+      </form>
+
+      {testigo?.id && (
+        <div className="mt-6">
+          <HistorialCambios entidad="testigo" entidad_id={testigo.id} />
+        </div>
       )}
-
-      <input name="nombre" value={formulario.nombre} onChange={handleChange} placeholder="Nombre" required className="border p-2 rounded" />
-      <input name="apellido" value={formulario.apellido} onChange={handleChange} placeholder="Apellido" required className="border p-2 rounded" />
-      <input name="rut" value={formulario.rut} onChange={handleChange} placeholder="RUT" required className="border p-2 rounded" />
-      <input name="correo" value={formulario.correo || ''} onChange={handleChange} placeholder="Correo" type="email" className="border p-2 rounded" />
-      <input name="telefono" value={formulario.telefono || ''} onChange={handleChange} placeholder="Teléfono" className="border p-2 rounded" />
-
-      <select name="empresa_id" value={formulario.empresa_id || ''} onChange={handleChange} className="border p-2 rounded">
-        <option value="">Empresa (opcional)</option>
-        {empresas.map((e) => (
-          <option key={e.id} value={e.id}>{e.nombre}</option>
-        ))}
-      </select>
-
-      <select name="reporte_id" value={formulario.reporte_id} onChange={handleChange} required className="border p-2 rounded">
-        <option value="">Seleccione Reporte</option>
-        {reportes.map((r) => (
-          <option key={r.id} value={r.id}>{r.titulo}</option>
-        ))}
-      </select>
-
-      <div className="md:col-span-2">
-        <label className="block font-medium mb-1">Declaración</label>
-        <textarea name="declaracion" value={formulario.declaracion || ''} onChange={handleChange} className="w-full border p-2 rounded" />
-      </div>
-
-      <div className="md:col-span-2 flex justify-end">
-        <button type="submit" className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700">
-          {testigo ? 'Actualizar' : 'Registrar'} Testigo
-        </button>
-      </div>
-    </form>
+    </div>
   );
 }

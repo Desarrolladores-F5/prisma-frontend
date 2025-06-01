@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useSession } from 'next-auth/react';
 import {
   crearProtocolo,
   actualizarProtocolo,
@@ -8,6 +9,8 @@ import {
   obtenerFaenas,
   obtenerUsuarios
 } from '@/lib/api';
+import { registrarCambioHistorial } from '@/lib/registrarCambio';
+import HistorialCambios from '@/components/historial/HistorialCambios';
 
 export interface Protocolo {
   id?: number;
@@ -20,7 +23,7 @@ export interface Protocolo {
   vigente: boolean;
   fecha_emision?: string;
   fecha_vigencia?: string;
-  activo: boolean; // ✅ Agregado aquí
+  activo: boolean;
 }
 
 interface Props {
@@ -29,6 +32,9 @@ interface Props {
 }
 
 export default function FormularioProtocolo({ protocolo, onGuardado }: Props) {
+  const { data: session } = useSession();
+  const usuarioId = session?.user?.id;
+
   const [formulario, setFormulario] = useState<Protocolo>({
     nombre: '',
     descripcion: '',
@@ -39,7 +45,7 @@ export default function FormularioProtocolo({ protocolo, onGuardado }: Props) {
     vigente: true,
     fecha_emision: '',
     fecha_vigencia: '',
-    activo: true, // ✅ Inicialización
+    activo: true,
   });
 
   const [usuarios, setUsuarios] = useState<any[]>([]);
@@ -77,8 +83,18 @@ export default function FormularioProtocolo({ protocolo, onGuardado }: Props) {
       if (protocolo?.id) {
         await actualizarProtocolo(protocolo.id, formulario);
         setMensaje('✅ Protocolo actualizado correctamente');
+
+        if (usuarioId) {
+          await registrarCambioHistorial({
+            usuario_id: usuarioId,
+            entidad: 'protocolo',
+            entidad_id: protocolo.id,
+            accion: 'edición',
+            detalles: formulario,
+          });
+        }
       } else {
-        await crearProtocolo(formulario); // ✅ asegúrate que "activo" se incluya aquí
+        await crearProtocolo(formulario);
         setMensaje('✅ Protocolo creado correctamente');
         setFormulario({
           nombre: '', descripcion: '', version: '', responsable_id: 0, empresa_id: 0,
@@ -93,79 +109,87 @@ export default function FormularioProtocolo({ protocolo, onGuardado }: Props) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
-      {mensaje && <p className="md:col-span-2 text-sm text-blue-600 bg-blue-100 p-2 rounded border border-blue-300">{mensaje}</p>}
+    <div>
+      <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {mensaje && <p className="md:col-span-2 text-sm text-blue-600 bg-blue-100 p-2 rounded border border-blue-300">{mensaje}</p>}
 
-      <div className="md:col-span-2">
-        <label className="block font-medium mb-1">Nombre</label>
-        <input name="nombre" value={formulario.nombre} onChange={handleChange} required className="w-full border p-2 rounded" />
-      </div>
+        <div className="md:col-span-2">
+          <label className="block font-medium mb-1">Nombre</label>
+          <input name="nombre" value={formulario.nombre} onChange={handleChange} required className="w-full border p-2 rounded" />
+        </div>
 
-      <div className="md:col-span-2">
-        <label className="block font-medium mb-1">Descripción</label>
-        <textarea name="descripcion" value={formulario.descripcion} onChange={handleChange} className="w-full border p-2 rounded" />
-      </div>
+        <div className="md:col-span-2">
+          <label className="block font-medium mb-1">Descripción</label>
+          <textarea name="descripcion" value={formulario.descripcion} onChange={handleChange} className="w-full border p-2 rounded" />
+        </div>
 
-      <div>
-        <label className="block font-medium mb-1">Versión</label>
-        <input name="version" value={formulario.version} onChange={handleChange} className="w-full border p-2 rounded" />
-      </div>
+        <div>
+          <label className="block font-medium mb-1">Versión</label>
+          <input name="version" value={formulario.version} onChange={handleChange} className="w-full border p-2 rounded" />
+        </div>
 
-      <div>
-        <label className="block font-medium mb-1">Responsable</label>
-        <select name="responsable_id" value={formulario.responsable_id} onChange={handleChange} required className="w-full border p-2 rounded">
-          <option value="">Seleccione</option>
-          {usuarios.map(u => <option key={u.id} value={u.id}>{u.nombre}</option>)}
-        </select>
-      </div>
+        <div>
+          <label className="block font-medium mb-1">Responsable</label>
+          <select name="responsable_id" value={formulario.responsable_id} onChange={handleChange} required className="w-full border p-2 rounded">
+            <option value="">Seleccione</option>
+            {usuarios.map(u => <option key={u.id} value={u.id}>{u.nombre}</option>)}
+          </select>
+        </div>
 
-      <div>
-        <label className="block font-medium mb-1">Empresa</label>
-        <select name="empresa_id" value={formulario.empresa_id} onChange={handleChange} required className="w-full border p-2 rounded">
-          <option value="">Seleccione</option>
-          {empresas.map(e => <option key={e.id} value={e.id}>{e.nombre}</option>)}
-        </select>
-      </div>
+        <div>
+          <label className="block font-medium mb-1">Empresa</label>
+          <select name="empresa_id" value={formulario.empresa_id} onChange={handleChange} required className="w-full border p-2 rounded">
+            <option value="">Seleccione</option>
+            {empresas.map(e => <option key={e.id} value={e.id}>{e.nombre}</option>)}
+          </select>
+        </div>
 
-      <div>
-        <label className="block font-medium mb-1">Faena</label>
-        <select name="faena_id" value={formulario.faena_id} onChange={handleChange} required className="w-full border p-2 rounded">
-          <option value="">Seleccione</option>
-          {faenas.map(f => <option key={f.id} value={f.id}>{f.nombre}</option>)}
-        </select>
-      </div>
+        <div>
+          <label className="block font-medium mb-1">Faena</label>
+          <select name="faena_id" value={formulario.faena_id} onChange={handleChange} required className="w-full border p-2 rounded">
+            <option value="">Seleccione</option>
+            {faenas.map(f => <option key={f.id} value={f.id}>{f.nombre}</option>)}
+          </select>
+        </div>
 
-      <div>
-        <label className="block font-medium mb-1">Vigente</label>
-        <select name="vigente" value={String(formulario.vigente)} onChange={handleChange} className="w-full border p-2 rounded">
-          <option value="true">Sí</option>
-          <option value="false">No</option>
-        </select>
-      </div>
+        <div>
+          <label className="block font-medium mb-1">Vigente</label>
+          <select name="vigente" value={String(formulario.vigente)} onChange={handleChange} className="w-full border p-2 rounded">
+            <option value="true">Sí</option>
+            <option value="false">No</option>
+          </select>
+        </div>
 
-      <div>
-        <label className="block font-medium mb-1">Activo</label>
-        <select name="activo" value={String(formulario.activo)} onChange={handleChange} className="w-full border p-2 rounded">
-          <option value="true">Sí</option>
-          <option value="false">No</option>
-        </select>
-      </div>
+        <div>
+          <label className="block font-medium mb-1">Activo</label>
+          <select name="activo" value={String(formulario.activo)} onChange={handleChange} className="w-full border p-2 rounded">
+            <option value="true">Sí</option>
+            <option value="false">No</option>
+          </select>
+        </div>
 
-      <div>
-        <label className="block font-medium mb-1">Fecha de Emisión</label>
-        <input type="date" name="fecha_emision" value={formulario.fecha_emision || ''} onChange={handleChange} className="w-full border p-2 rounded" />
-      </div>
+        <div>
+          <label className="block font-medium mb-1">Fecha de Emisión</label>
+          <input type="date" name="fecha_emision" value={formulario.fecha_emision || ''} onChange={handleChange} className="w-full border p-2 rounded" />
+        </div>
 
-      <div>
-        <label className="block font-medium mb-1">Fecha de Vigencia</label>
-        <input type="date" name="fecha_vigencia" value={formulario.fecha_vigencia || ''} onChange={handleChange} className="w-full border p-2 rounded" />
-      </div>
+        <div>
+          <label className="block font-medium mb-1">Fecha de Vigencia</label>
+          <input type="date" name="fecha_vigencia" value={formulario.fecha_vigencia || ''} onChange={handleChange} className="w-full border p-2 rounded" />
+        </div>
 
-      <div className="md:col-span-2 flex justify-end">
-        <button type="submit" className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700">
-          {protocolo ? 'Actualizar' : 'Registrar'} Protocolo
-        </button>
-      </div>
-    </form>
+        <div className="md:col-span-2 flex justify-end">
+          <button type="submit" className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700">
+            {protocolo ? 'Actualizar' : 'Registrar'} Protocolo
+          </button>
+        </div>
+      </form>
+
+      {protocolo?.id && (
+        <div className="mt-6">
+          <HistorialCambios entidad="protocolo" entidad_id={protocolo.id} />
+        </div>
+      )}
+    </div>
   );
 }

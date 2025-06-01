@@ -180,6 +180,24 @@ export const crearHistorialCambio = (data: any) =>
     body: JSON.stringify(data),
   });
 
+// --- COMENTARIOS ---
+export const obtenerComentarios = () =>
+  handleFetch<any[]>(`${API_BASE}/comentarios`);
+
+export const obtenerComentariosPorEntidad = (
+  entidadTipo: string,
+  entidadId: number
+) =>
+  handleFetch<any[]>(
+    `${API_BASE}/comentarios?entidadTipo=${entidadTipo}&entidadId=${entidadId}`
+  );
+
+export const crearComentario = (data: any) =>
+  handleFetch<any>(`${API_BASE}/comentarios`, {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+
 // --- TOTALES (Estadísticas) ---
 export async function obtenerTotalReportesActivos(): Promise<number> {
   const reportes = await obtenerReportes();

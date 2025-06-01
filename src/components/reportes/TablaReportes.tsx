@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { obtenerReportes, eliminarReporte } from '@/lib/api';
 import GraficoReportesPorTipo from './GraficoReportesPorTipo';
+import Link from 'next/link';
 
 interface Props {
   onEditar?: (reporte: any) => void;
@@ -120,19 +121,29 @@ export default function TablaReportes({ onEditar, onEliminado, refrescar }: Prop
                       ? new Date(reporte.fecha_evento).toLocaleDateString('es-CL')
                       : '-'}
                   </td>
-                  <td className="p-2 space-x-2">
-                    <button
-                      onClick={() => onEditar?.(reporte)}
-                      className="bg-yellow-500 text-white px-2 py-1 rounded text-sm"
-                    >
-                      Editar
-                    </button>
-                    <button
-                      onClick={() => handleEliminar(reporte.id)}
-                      className="bg-red-600 text-white px-2 py-1 rounded text-sm"
-                    >
-                      Eliminar
-                    </button>
+                  <td className="p-2 space-y-1">
+                    <div className="space-x-2">
+                      <button
+                        onClick={() => onEditar?.(reporte)}
+                        className="bg-yellow-500 text-white px-2 py-1 rounded text-sm"
+                      >
+                        Editar
+                      </button>
+                      <button
+                        onClick={() => handleEliminar(reporte.id)}
+                        className="bg-red-600 text-white px-2 py-1 rounded text-sm"
+                      >
+                        Eliminar
+                      </button>
+                    </div>
+                    <div className="mt-1">
+                      <Link
+                        href={`/admin/dashboard/comentarios/reporte/${reporte.id}`}
+                        className="text-blue-600 hover:underline text-sm"
+                      >
+                        💬 Ver Comentarios
+                      </Link>
+                    </div>
                   </td>
                 </tr>
               ))}

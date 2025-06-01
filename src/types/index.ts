@@ -201,3 +201,12 @@ export interface HistorialCambio {
     nombre: string;
   };
 }
+
+export interface Comentario {
+  id: number;
+  autor_id: number;
+  mensaje: string;
+  entidad_tipo: string;
+  entidad_id: number;
+  fecha: string;
+}

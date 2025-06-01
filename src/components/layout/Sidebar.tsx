@@ -22,13 +22,13 @@ const links = [
   { href: '/admin/dashboard/firmas', label: '✍️ Firmas Digitales' },
   { href: '/admin/dashboard/testigos', label: '🧾 Testigos' },
   { href: '/admin/dashboard/estadisticas', label: '📊 Estadísticas' },
-  { href: '/admin/dashboard/historial', label: '📜 Historial de Cambios' }, 
+  { href: '/admin/dashboard/historial', label: '📜 Historial de Cambios' },
+  { href: '/admin/dashboard/comentarios', label: '💬 Comentarios' },
   { href: '/admin/dashboard/configuracion', label: '⚙️ Configuración' },
 ];
 
-
 export default function Sidebar() {
-  const pathname = usePathname();
+  const pathname = usePathname() ?? ''; // ← aquí se garantiza que sea string
 
   return (
     <aside className="w-64 bg-gray-900 text-white p-4">
