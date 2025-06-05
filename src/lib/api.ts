@@ -34,6 +34,11 @@ export const crearUsuario = (data: any) => handleFetch<any>(`${API_BASE}/usuario
 export const actualizarUsuario = (id: number, data: any) => handleFetch<any>(`${API_BASE}/usuarios/${id}`, { method: 'PUT', body: JSON.stringify(data) });
 export const eliminarUsuario = (id: number) => handleFetch<any>(`${API_BASE}/usuarios/${id}`, { method: 'DELETE' });
 
+// ✅ Nuevo método para supervisor
+export const obtenerUsuariosPorFaena = (faenaId: number) =>
+  handleFetch<any[]>(`${API_BASE}/usuarios/faena/${faenaId}`);
+
+
 // --- REPORTES ---
 export const obtenerReportes = () => handleFetch<any[]>(`${API_BASE}/reportes`);
 export const crearReporte = (data: any) => handleFetch<any>(`${API_BASE}/reportes`, { method: 'POST', body: JSON.stringify(data) });

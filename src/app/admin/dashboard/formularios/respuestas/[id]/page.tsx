@@ -17,7 +17,7 @@ export default function RespuestasFormularioPage() {
           href="/admin/dashboard/formularios"
           className="bg-gray-700 text-white px-4 py-2 rounded hover:bg-gray-800"
         >
-          ← Volver al Listado
+          Volver al Listado
         </Link>
       </div>
 
