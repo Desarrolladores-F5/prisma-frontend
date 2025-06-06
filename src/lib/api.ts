@@ -219,6 +219,27 @@ export const crearComentario = (data: any) =>
     body: JSON.stringify(data),
   });
 
+// --- EXÁMENES ---
+export const obtenerExamenes = () =>
+  handleFetch<any[]>(`${API_BASE}/examenes`);
+
+export const crearExamen = (data: any) =>
+  handleFetch<any>(`${API_BASE}/examenes`, {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+
+export const actualizarExamen = (id: number, data: any) =>
+  handleFetch<any>(`${API_BASE}/examenes/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  });
+
+export const eliminarExamen = (id: number) =>
+  handleFetch<any>(`${API_BASE}/examenes/${id}`, {
+    method: 'DELETE',
+  });
+
 // --- TOTALES (Estadísticas) ---
 export async function obtenerTotalReportesActivos(): Promise<number> {
   const reportes = await obtenerReportes();

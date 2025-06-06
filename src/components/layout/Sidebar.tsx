@@ -13,6 +13,7 @@ const links = [
   { href: '/admin/dashboard/auditorias', label: '🗂️ Auditorías' },
   { href: '/admin/dashboard/inspecciones', label: '🔍 Inspecciones' },
   { href: '/admin/dashboard/capacitaciones', label: '🎓 Capacitaciones' },
+  { href: '/admin/dashboard/examenes', label: '🧪 Exámenes' }, 
   { href: '/admin/dashboard/epp', label: '👷 EPP' },
   { href: '/admin/dashboard/notificaciones', label: '🔔 Notificaciones' },
   { href: '/admin/dashboard/documentos', label: '📄 Documentos' },
