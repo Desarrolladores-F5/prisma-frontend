@@ -2,7 +2,13 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { obtenerFaenas, obtenerUsuarios, crearCapacitacion, actualizarCapacitacion } from '@/lib/api';
+import {
+  obtenerFaenas,
+  obtenerUsuarios,
+  crearCapacitacion,
+  actualizarCapacitacion,
+  obtenerDocumentos,
+} from '@/lib/api';
 
 interface Props {
   capacitacion?: any;
@@ -26,13 +32,28 @@ export default function FormularioCapacitacion({ capacitacion, onGuardado }: Pro
   const [mensaje, setMensaje] = useState('');
   const [usuarios, setUsuarios] = useState<any[]>([]);
   const [faenas, setFaenas] = useState<any[]>([]);
+  const [documentos, setDocumentos] = useState<any[]>([]);
 
   useEffect(() => {
     const cargarDatos = async () => {
-      const faenas = await obtenerFaenas();
-      const usuarios = await obtenerUsuarios();
-      setFaenas(faenas);
-      setUsuarios(usuarios);
+      try {
+        const faenas = await obtenerFaenas();
+        const usuarios = await obtenerUsuarios();
+        const documentosData = await obtenerDocumentos();
+
+        setFaenas(Array.isArray(faenas) ? faenas : []);
+        setUsuarios(Array.isArray(usuarios) ? usuarios : []);
+        if (Array.isArray(documentosData)) {
+          setDocumentos(documentosData);
+          console.log('✅ Documentos cargados:', documentosData);
+        } else {
+          console.warn('⚠️ Documentos no es un array:', documentosData);
+          setDocumentos([]);
+        }
+      } catch (error) {
+        console.error('❌ Error al cargar datos:', error);
+        setDocumentos([]);
+      }
     };
 
     cargarDatos();
@@ -46,7 +67,9 @@ export default function FormularioCapacitacion({ capacitacion, onGuardado }: Pro
         fecha: capacitacion.fecha?.substring(0, 10) || '',
         usuario_id: capacitacion.usuario_id || '',
         faena_id: capacitacion.faena_id || '',
-        asistencia: capacitacion.asistencia || '',
+        asistencia: typeof capacitacion.asistencia === 'string'
+          ? capacitacion.asistencia
+          : JSON.stringify(capacitacion.asistencia ?? ''),
         documento_id: capacitacion.documento_id || '',
       });
     }
@@ -65,6 +88,7 @@ export default function FormularioCapacitacion({ capacitacion, onGuardado }: Pro
       usuario_id: parseInt(form.usuario_id),
       faena_id: parseInt(form.faena_id),
       documento_id: form.documento_id ? parseInt(form.documento_id) : null,
+      asistencia: form.asistencia, // podrías aplicar JSON.parse si es necesario
     };
 
     const res = modoEdicion
@@ -92,53 +116,112 @@ export default function FormularioCapacitacion({ capacitacion, onGuardado }: Pro
 
   return (
     <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-white p-6 rounded shadow-md">
-      <h2 className="md:col-span-2 text-xl font-bold">{modoEdicion ? 'Editar Capacitación' : 'Registrar Capacitación'}</h2>
+      <h2 className="md:col-span-2 text-xl font-bold">
+        {modoEdicion ? 'Editar Capacitación' : 'Registrar Capacitación'}
+      </h2>
 
-      {mensaje && <p className="md:col-span-2 text-sm text-blue-600 bg-blue-100 p-2 rounded border border-blue-300">{mensaje}</p>}
+      {mensaje && (
+        <p className="md:col-span-2 text-sm text-blue-600 bg-blue-100 p-2 rounded border border-blue-300">
+          {mensaje}
+        </p>
+      )}
 
       <div>
         <label className="block text-sm font-medium mb-1">Título</label>
-        <input name="titulo" value={form.titulo} onChange={handleChange} required className="w-full border p-2 rounded" />
+        <input
+          name="titulo"
+          value={form.titulo}
+          onChange={handleChange}
+          required
+          className="w-full border p-2 rounded"
+        />
       </div>
 
       <div>
         <label className="block text-sm font-medium mb-1">Fecha</label>
-        <input type="date" name="fecha" value={form.fecha} onChange={handleChange} className="w-full border p-2 rounded" />
+        <input
+          type="date"
+          name="fecha"
+          value={form.fecha}
+          onChange={handleChange}
+          className="w-full border p-2 rounded"
+        />
       </div>
 
       <div className="md:col-span-2">
         <label className="block text-sm font-medium mb-1">Descripción</label>
-        <textarea name="descripcion" value={form.descripcion} onChange={handleChange} className="w-full border p-2 rounded" rows={3} />
+        <textarea
+          name="descripcion"
+          value={form.descripcion}
+          onChange={handleChange}
+          className="w-full border p-2 rounded"
+          rows={3}
+        />
       </div>
 
       <div>
         <label className="block text-sm font-medium mb-1">Usuario</label>
-        <select name="usuario_id" value={form.usuario_id} onChange={handleChange} className="w-full border p-2 rounded" required>
+        <select
+          name="usuario_id"
+          value={form.usuario_id}
+          onChange={handleChange}
+          className="w-full border p-2 rounded"
+          required
+        >
           <option value="">Seleccione un usuario</option>
           {usuarios.map(u => (
-            <option key={u.id} value={u.id}>{u.nombre} {u.apellido}</option>
+            <option key={u.id} value={u.id}>
+              {u.nombre} {u.apellido}
+            </option>
           ))}
         </select>
       </div>
 
       <div>
         <label className="block text-sm font-medium mb-1">Faena</label>
-        <select name="faena_id" value={form.faena_id} onChange={handleChange} className="w-full border p-2 rounded" required>
+        <select
+          name="faena_id"
+          value={form.faena_id}
+          onChange={handleChange}
+          className="w-full border p-2 rounded"
+          required
+        >
           <option value="">Seleccione una faena</option>
           {faenas.map(f => (
-            <option key={f.id} value={f.id}>{f.nombre}</option>
+            <option key={f.id} value={f.id}>
+              {f.nombre}
+            </option>
           ))}
         </select>
       </div>
 
       <div className="md:col-span-2">
         <label className="block text-sm font-medium mb-1">Asistencia (JSON)</label>
-        <textarea name="asistencia" value={form.asistencia} onChange={handleChange} className="w-full border p-2 rounded" rows={2} />
+        <textarea
+          name="asistencia"
+          value={form.asistencia}
+          onChange={handleChange}
+          className="w-full border p-2 rounded"
+          rows={2}
+        />
       </div>
 
       <div className="md:col-span-2">
-        <label className="block text-sm font-medium mb-1">ID Documento (opcional)</label>
-        <input type="number" name="documento_id" value={form.documento_id} onChange={handleChange} className="w-full border p-2 rounded" />
+        <label className="block text-sm font-medium mb-1">Documento asociado (opcional)</label>
+        <select
+          name="documento_id"
+          value={form.documento_id}
+          onChange={handleChange}
+          className="w-full border p-2 rounded"
+        >
+          <option value="">— Seleccionar documento —</option>
+          {Array.isArray(documentos) &&
+            documentos.map((doc) => (
+              <option key={doc.id} value={doc.id}>
+                {doc.nombre}
+              </option>
+            ))}
+        </select>
       </div>
 
       <div className="md:col-span-2 flex justify-end">

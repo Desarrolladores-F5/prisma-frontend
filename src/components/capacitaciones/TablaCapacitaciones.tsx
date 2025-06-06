@@ -16,6 +16,11 @@ interface Capacitacion {
   faena?: {
     nombre: string;
   };
+  documento?: {
+    id: number;
+    nombre: string;
+    url: string;
+  };
 }
 
 interface Props {
@@ -57,7 +62,7 @@ export default function TablaCapacitaciones({ refrescar, onEditar, onEliminado }
             <th className="border p-2">ID</th>
             <th className="border p-2">Título</th>
             <th className="border p-2">Fecha</th>
-            <th className="border p-2">Usuario</th>
+            <th className="border p-2">Capacitador</th>
             <th className="border p-2">Faena</th>
             <th className="border p-2">Acciones</th>
           </tr>
@@ -67,25 +72,33 @@ export default function TablaCapacitaciones({ refrescar, onEditar, onEliminado }
             <tr key={cap.id} className="border-t hover:bg-gray-50">
               <td className="p-2">{cap.id}</td>
               <td className="p-2">{cap.titulo}</td>
-              <td className="p-2">{new Date(cap.fecha).toLocaleDateString()}</td>
+              <td className="p-2">{new Date(cap.fecha).toLocaleDateString('es-CL')}</td>
               <td className="p-2">
                 {cap.usuario?.nombre && cap.usuario?.apellido
                   ? `${cap.usuario.nombre} ${cap.usuario.apellido}`
                   : '—'}
               </td>
-              <td className="p-2">
-                {cap.faena?.nombre ? cap.faena.nombre : '—'}
-              </td>
+              <td className="p-2">{cap.faena?.nombre || '—'}</td>
               <td className="p-2 space-x-2">
+                {cap.documento?.url && (
+                  <a
+                    href={`${process.env.NEXT_PUBLIC_API_URL}${cap.documento.url}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="bg-blue-600 text-white px-2 py-1 rounded text-sm hover:bg-blue-700"
+                  >
+                    Ver
+                  </a>
+                )}
                 <button
                   onClick={() => onEditar?.(cap)}
-                  className="bg-yellow-500 text-white px-2 py-1 rounded text-sm"
+                  className="bg-yellow-500 text-white px-2 py-1 rounded text-sm hover:bg-yellow-600"
                 >
                   Editar
                 </button>
                 <button
                   onClick={() => handleEliminar(cap.id)}
-                  className="bg-red-600 text-white px-2 py-1 rounded text-sm"
+                  className="bg-red-600 text-white px-2 py-1 rounded text-sm hover:bg-red-700"
                 >
                   Eliminar
                 </button>

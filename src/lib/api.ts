@@ -44,6 +44,8 @@ export const obtenerReportes = () => handleFetch<any[]>(`${API_BASE}/reportes`);
 export const crearReporte = (data: any) => handleFetch<any>(`${API_BASE}/reportes`, { method: 'POST', body: JSON.stringify(data) });
 export const actualizarReporte = (id: number, data: any) => handleFetch<any>(`${API_BASE}/reportes/${id}`, { method: 'PUT', body: JSON.stringify(data) });
 export const eliminarReporte = (id: number) => handleFetch<any>(`${API_BASE}/reportes/${id}`, { method: 'DELETE' });
+export const obtenerMisReportes = () =>
+  handleFetch<any[]>(`${API_BASE}/reportes/mis-reportes`);
 
 // --- FAENAS ---
 export const obtenerFaenas = () => handleFetch<any[]>(`${API_BASE}/faenas`);
@@ -68,6 +70,20 @@ export const obtenerCapacitaciones = () => handleFetch<any[]>(`${API_BASE}/capac
 export const crearCapacitacion = (data: any) => handleFetch<any>(`${API_BASE}/capacitaciones`, { method: 'POST', body: JSON.stringify(data) });
 export const actualizarCapacitacion = (id: number, data: any) => handleFetch<any>(`${API_BASE}/capacitaciones/${id}`, { method: 'PUT', body: JSON.stringify(data) });
 export const eliminarCapacitacion = (id: number) => handleFetch<any>(`${API_BASE}/capacitaciones/${id}`, { method: 'DELETE' });
+
+// ✅ CAPACITACIONES DISPONIBLES PARA TRABAJADOR
+export const obtenerCapacitacionesDisponibles = () =>
+  handleFetch<any[]>(`${API_BASE}/capacitaciones/disponibles`);
+
+// --- EXÁMENES DE CAPACITACIÓN ---
+export const obtenerPreguntasCapacitacion = (id: number) =>
+  handleFetch<any[]>(`${API_BASE}/capacitaciones/${id}/preguntas`);
+
+export const enviarRespuestasExamen = (capacitacionId: number, respuestas: any) =>
+  handleFetch<any>(`${API_BASE}/capacitaciones/${capacitacionId}/responder`, {
+    method: 'POST',
+    body: JSON.stringify({ respuestas }),
+  });
 
 // --- EPP ---
 export const obtenerEPP = () => handleFetch<any[]>(`${API_BASE}/epp`);
