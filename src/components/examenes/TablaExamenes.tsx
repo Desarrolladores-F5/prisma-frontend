@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { obtenerExamenes, eliminarExamen } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 
@@ -12,6 +13,7 @@ interface Props {
 
 export default function TablaExamenes({ onEditar, onEliminado, refrescar }: Props) {
   const [examenes, setExamenes] = useState<any[]>([]);
+  const router = useRouter();
 
   const cargarExamenes = async () => {
     try {
@@ -58,12 +60,26 @@ export default function TablaExamenes({ onEditar, onEliminado, refrescar }: Prop
               <td className="p-2 border">{examen.descripcion || '—'}</td>
               <td className="p-2 border">{examen.capacitacion_id}</td>
               <td className="p-2 border space-x-2">
-                <Button variant="outline" onClick={() => onEditar(examen)}>
+                <button
+                  onClick={() => onEditar(examen)}
+                  className="bg-yellow-500 text-white px-2 py-1 rounded text-sm hover:bg-yellow-600"
+                >
                   Editar
-                </Button>
-                <Button variant="destructive" onClick={() => handleEliminar(examen.id)}>
+                </button>
+                <button
+                  onClick={() => handleEliminar(examen.id)}
+                  className="bg-red-600 text-white px-2 py-1 rounded text-sm hover:bg-red-700"
+                >
                   Eliminar
-                </Button>
+                </button>
+                <button
+                  onClick={() =>
+                    router.push(`/admin/dashboard/examenes/${examen.id}/preguntas`)
+                  }
+                  className="bg-indigo-600 text-white px-2 py-1 rounded text-sm hover:bg-indigo-700"
+                >
+                  Preguntas
+                </button>
               </td>
             </tr>
           ))}

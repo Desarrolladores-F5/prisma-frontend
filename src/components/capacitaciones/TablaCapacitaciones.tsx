@@ -1,8 +1,10 @@
+// src/components/capacitaciones/TablaCapacitaciones.tsx
 'use client';
 
 import { useEffect, useState } from 'react';
 import { obtenerCapacitaciones, eliminarCapacitacion } from '@/lib/api';
 import { useRouter } from 'next/navigation';
+import { format } from 'date-fns';
 
 interface Capacitacion {
   id: number;
@@ -21,6 +23,9 @@ interface Capacitacion {
     nombre: string;
     url: string;
   };
+  examen?: {
+    id: number;
+  } | null;
 }
 
 interface Props {
@@ -64,6 +69,7 @@ export default function TablaCapacitaciones({ refrescar, onEditar, onEliminado }
             <th className="border p-2">Fecha</th>
             <th className="border p-2">Capacitador</th>
             <th className="border p-2">Faena</th>
+            <th className="border p-2">Examen</th>
             <th className="border p-2">Acciones</th>
           </tr>
         </thead>
@@ -72,13 +78,14 @@ export default function TablaCapacitaciones({ refrescar, onEditar, onEliminado }
             <tr key={cap.id} className="border-t hover:bg-gray-50">
               <td className="p-2">{cap.id}</td>
               <td className="p-2">{cap.titulo}</td>
-              <td className="p-2">{new Date(cap.fecha).toLocaleDateString('es-CL')}</td>
+              <td className="p-2">{format(new Date(cap.fecha), 'dd-MM-yyyy')}</td>
               <td className="p-2">
                 {cap.usuario?.nombre && cap.usuario?.apellido
                   ? `${cap.usuario.nombre} ${cap.usuario.apellido}`
                   : '—'}
               </td>
               <td className="p-2">{cap.faena?.nombre || '—'}</td>
+              <td className="p-2">{cap.examen?.id ? 'Con examen' : 'Sin examen'}</td>
               <td className="p-2 space-x-2">
                 {cap.documento?.url && (
                   <a
@@ -89,6 +96,16 @@ export default function TablaCapacitaciones({ refrescar, onEditar, onEliminado }
                   >
                     Ver
                   </a>
+                )}
+                {!!cap.examen?.id && (
+                  <button
+                    onClick={() =>
+                      router.push(`/admin/dashboard/examenes/${cap.examen!.id}/preguntas`)
+                    }
+                    className="bg-indigo-600 text-white px-2 py-1 rounded text-sm hover:bg-indigo-700"
+                  >
+                    Preguntas
+                  </button>
                 )}
                 <button
                   onClick={() => onEditar?.(cap)}

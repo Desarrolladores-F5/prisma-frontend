@@ -210,3 +210,29 @@ export interface Comentario {
   entidad_id: number;
   fecha: string;
 }
+
+// src/types/index.ts
+
+export interface CapacitacionConRelaciones {
+  id: number;
+  titulo: string;
+  fecha: string;
+  usuario?: {
+    nombre: string;
+    apellido: string;
+  };
+  faena?: {
+    nombre: string;
+  };
+  examen?: {
+    titulo: string;
+  } | null;
+}
+
+export interface Pregunta {
+  id: number;
+  enunciado: string;
+  alternativas: string[];
+  respuesta_correcta: string;
+  examen_id: number;
+}

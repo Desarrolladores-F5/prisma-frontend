@@ -4,8 +4,8 @@ import { useEffect, useState } from 'react';
 import { crearExamen, actualizarExamen, obtenerCapacitaciones } from '@/lib/api';
 
 interface Props {
-  examen?: any; // para modo edición
-  onGuardado?: () => void; // se ejecuta luego de guardar
+  examen?: any;
+  onGuardado?: () => void;
 }
 
 export default function FormularioExamen({ examen, onGuardado }: Props) {
@@ -22,8 +22,12 @@ export default function FormularioExamen({ examen, onGuardado }: Props) {
 
   useEffect(() => {
     const cargarDatos = async () => {
-      const dataCapacitaciones = await obtenerCapacitaciones();
-      setCapacitaciones(dataCapacitaciones);
+      try {
+        const dataCapacitaciones = await obtenerCapacitaciones();
+        setCapacitaciones(dataCapacitaciones);
+      } catch (error: any) {
+        console.error('❌ Error al cargar capacitaciones:', error.message);
+      }
     };
 
     cargarDatos();
@@ -32,7 +36,7 @@ export default function FormularioExamen({ examen, onGuardado }: Props) {
       setForm({
         titulo: examen.titulo || '',
         descripcion: examen.descripcion || '',
-        capacitacion_id: examen.capacitacion_id || '',
+        capacitacion_id: examen.capacitacion_id?.toString() || '',
       });
     }
   }, [modoEdicion, examen]);
@@ -40,13 +44,18 @@ export default function FormularioExamen({ examen, onGuardado }: Props) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      if (!form.capacitacion_id) {
+        setMensaje('❌ Debes seleccionar una capacitación.');
+        return;
+      }
+
       if (modoEdicion) {
         await actualizarExamen(examen.id, form);
         setMensaje('✅ Examen actualizado correctamente');
       } else {
         await crearExamen(form);
         setMensaje('✅ Examen creado correctamente');
-        setForm({ titulo: '', descripcion: '', capacitacion_id: '' }); // limpiar si es creación
+        setForm({ titulo: '', descripcion: '', capacitacion_id: '' });
       }
 
       onGuardado?.();
@@ -92,7 +101,7 @@ export default function FormularioExamen({ examen, onGuardado }: Props) {
           <option value="">Seleccionar capacitación</option>
           {capacitaciones.map((c) => (
             <option key={c.id} value={c.id}>
-              {c.nombre}
+              {c.titulo}
             </option>
           ))}
         </select>

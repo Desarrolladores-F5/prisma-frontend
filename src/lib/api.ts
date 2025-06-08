@@ -85,6 +85,30 @@ export const enviarRespuestasExamen = (capacitacionId: number, respuestas: any) 
     body: JSON.stringify({ respuestas }),
   });
 
+// --- PREGUNTAS DE EXAMEN ---
+export const obtenerPreguntasExamen = (examenId: string) =>
+  handleFetch<any[]>(`${API_BASE}/preguntas-examen/${examenId}`);
+
+export const crearPreguntaExamen = (data: any) =>
+  handleFetch<any>(`${API_BASE}/preguntas-examen`, {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+
+export const actualizarPreguntaExamen = (id: number, data: any) =>
+  handleFetch<any>(`${API_BASE}/preguntas-examen/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  });
+
+export const eliminarPreguntaExamen = (id: number) =>
+  handleFetch<any>(`${API_BASE}/preguntas-examen/${id}`, {
+    method: 'DELETE',
+  });
+
+  export const obtenerExamenPorId = (id: string | number) =>
+  handleFetch<any>(`${API_BASE}/examenes/${id}`);
+
 // --- EPP ---
 export const obtenerEPP = () => handleFetch<any[]>(`${API_BASE}/epp`);
 export const crearEPP = (data: any) => handleFetch<any>(`${API_BASE}/epp`, { method: 'POST', body: JSON.stringify(data) });
