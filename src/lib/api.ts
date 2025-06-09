@@ -264,7 +264,11 @@ export const eliminarExamen = (id: number) =>
     method: 'DELETE',
   });
 
-// --- TOTALES (Estadísticas) ---
+// --- RESULTADO DE EXAMEN ---
+export const obtenerResultadoExamen = (capacitacionId: number) =>
+  handleFetch<any>(`${API_BASE}/capacitaciones/${capacitacionId}/resultado`);
+
+  // --- TOTALES (Estadísticas) ---
 export async function obtenerTotalReportesActivos(): Promise<number> {
   const reportes = await obtenerReportes();
   return reportes.filter((r: any) => r.activo).length;

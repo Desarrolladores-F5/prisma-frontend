@@ -11,8 +11,13 @@ interface Props {
 export default function FormularioExamenTrabajador({ capacitacion, onVolver }: Props) {
   const [preguntas, setPreguntas] = useState<any[]>([]);
   const [respuestas, setRespuestas] = useState<{ [key: string]: string }>({});
-  const [mensaje, setMensaje] = useState('');
   const [cargando, setCargando] = useState(true);
+  const [resultado, setResultado] = useState<{
+    fecha: string;
+    porcentaje: number;
+    aprobado: boolean;
+  } | null>(null);
+  const [mensaje, setMensaje] = useState('');
 
   useEffect(() => {
     const cargarPreguntas = async () => {
@@ -34,40 +39,80 @@ export default function FormularioExamenTrabajador({ capacitacion, onVolver }: P
   };
 
   const handleSubmit = async () => {
+    const totalRespondidas = Object.keys(respuestas).length;
+    if (totalRespondidas !== preguntas.length) {
+      setMensaje('❌ Debes responder todas las preguntas antes de enviar el examen.');
+      return;
+    }
+
     try {
-      await enviarRespuestasExamen(capacitacion.id, respuestas);
-      setMensaje('✅ Examen enviado correctamente.');
+      const res = await enviarRespuestasExamen(capacitacion.id, respuestas);
+      setResultado({
+        fecha: new Date(res.fecha).toLocaleString(),
+        porcentaje: res.porcentaje,
+        aprobado: res.aprobado,
+      });
     } catch {
       setMensaje('❌ Error al enviar respuestas.');
     }
   };
 
+  if (resultado) {
+    return (
+      <div className="p-6 border rounded shadow space-y-4">
+        <h2 className="text-2xl font-bold">Resultado del Examen</h2>
+        <p><strong>Fecha:</strong> {resultado.fecha}</p>
+        <p><strong>Porcentaje de Aprobación:</strong> {resultado.porcentaje}%</p>
+        <p className={`font-semibold ${resultado.aprobado ? 'text-green-700' : 'text-red-700'}`}>
+          {resultado.aprobado ? '✅ Aprobado' : '❌ Reprobado'}
+        </p>
+        <button
+          onClick={onVolver}
+          className="bg-gray-800 text-white px-4 py-2 rounded hover:bg-gray-900"
+        >
+          Volver al listado
+        </button>
+      </div>
+    );
+  }
+
   return (
-    <div className="space-y-4">
-      <h2 className="text-xl font-bold">Examen: {capacitacion.nombre}</h2>
+    <div className="space-y-6">
+      <h2 className="text-2xl font-bold">
+        Examen: <span className="text-blue-700">{capacitacion.titulo}</span>
+      </h2>
 
       {cargando ? (
         <p>Cargando preguntas...</p>
       ) : preguntas.length === 0 ? (
-        <p>No hay preguntas para esta capacitación.</p>
+        <p>No hay preguntas disponibles para este examen.</p>
       ) : (
-        <form onSubmit={(e) => e.preventDefault()}>
+        <form onSubmit={(e) => e.preventDefault()} className="space-y-6">
           {preguntas.map((pregunta) => (
-            <div key={pregunta.id} className="mb-4">
-              <label className="block font-medium mb-1">{pregunta.texto}</label>
-              <input
-                type="text"
-                className="border p-2 rounded w-full"
-                value={respuestas[pregunta.id] || ''}
-                onChange={(e) => handleChange(pregunta.id, e.target.value)}
-              />
+            <div key={pregunta.id} className="border p-4 rounded shadow">
+              <p className="font-medium mb-2">{pregunta.enunciado}</p>
+              <div className="space-y-1">
+                {pregunta.alternativas.map((alt: string, index: number) => (
+                  <label key={index} className="block">
+                    <input
+                      type="radio"
+                      name={`pregunta-${pregunta.id}`}
+                      value={alt}
+                      checked={respuestas[pregunta.id] === alt}
+                      onChange={() => handleChange(pregunta.id, alt)}
+                      className="mr-2"
+                    />
+                    {alt}
+                  </label>
+                ))}
+              </div>
             </div>
           ))}
 
-          <div className="flex space-x-2 mt-6">
+          <div className="flex space-x-3">
             <button
               onClick={handleSubmit}
-              className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+              className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
             >
               Enviar Examen
             </button>
@@ -81,7 +126,7 @@ export default function FormularioExamenTrabajador({ capacitacion, onVolver }: P
         </form>
       )}
 
-      {mensaje && <p className="mt-4">{mensaje}</p>}
+      {mensaje && <p className="mt-4 font-semibold">{mensaje}</p>}
     </div>
   );
 }
