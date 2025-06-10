@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { enviarRespuestasExamen, obtenerPreguntasCapacitacion } from '@/lib/api';
 
 interface Props {
@@ -12,12 +13,8 @@ export default function FormularioExamenTrabajador({ capacitacion, onVolver }: P
   const [preguntas, setPreguntas] = useState<any[]>([]);
   const [respuestas, setRespuestas] = useState<{ [key: string]: string }>({});
   const [cargando, setCargando] = useState(true);
-  const [resultado, setResultado] = useState<{
-    fecha: string;
-    porcentaje: number;
-    aprobado: boolean;
-  } | null>(null);
   const [mensaje, setMensaje] = useState('');
+  const router = useRouter();
 
   useEffect(() => {
     const cargarPreguntas = async () => {
@@ -46,35 +43,12 @@ export default function FormularioExamenTrabajador({ capacitacion, onVolver }: P
     }
 
     try {
-      const res = await enviarRespuestasExamen(capacitacion.id, respuestas);
-      setResultado({
-        fecha: new Date(res.fecha).toLocaleString(),
-        porcentaje: res.porcentaje,
-        aprobado: res.aprobado,
-      });
+      await enviarRespuestasExamen(capacitacion.id, respuestas);
+      router.push(`/trabajador/capacitaciones/resultado/${capacitacion.id}`);
     } catch {
       setMensaje('❌ Error al enviar respuestas.');
     }
   };
-
-  if (resultado) {
-    return (
-      <div className="p-6 border rounded shadow space-y-4">
-        <h2 className="text-2xl font-bold">Resultado del Examen</h2>
-        <p><strong>Fecha:</strong> {resultado.fecha}</p>
-        <p><strong>Porcentaje de Aprobación:</strong> {resultado.porcentaje}%</p>
-        <p className={`font-semibold ${resultado.aprobado ? 'text-green-700' : 'text-red-700'}`}>
-          {resultado.aprobado ? '✅ Aprobado' : '❌ Reprobado'}
-        </p>
-        <button
-          onClick={onVolver}
-          className="bg-gray-800 text-white px-4 py-2 rounded hover:bg-gray-900"
-        >
-          Volver al listado
-        </button>
-      </div>
-    );
-  }
 
   return (
     <div className="space-y-6">
