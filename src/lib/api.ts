@@ -75,6 +75,10 @@ export const eliminarCapacitacion = (id: number) => handleFetch<any>(`${API_BASE
 export const obtenerCapacitacionesDisponibles = () =>
   handleFetch<any[]>(`${API_BASE}/capacitaciones/disponibles`);
 
+// ✅ Obtener resumen de respuestas por capacitación (nuevo)
+export const obtenerCapacitacionRespuestas = (id: number) =>
+  handleFetch<any[]>(`${API_BASE}/capacitaciones/${id}/respuestas`);
+
 // --- EXÁMENES DE CAPACITACIÓN ---
 export const obtenerPreguntasCapacitacion = (id: number) =>
   handleFetch<any[]>(`${API_BASE}/capacitaciones/${id}/preguntas`);

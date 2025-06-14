@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { enviarRespuestasExamen, obtenerPreguntasCapacitacion } from '@/lib/api';
+import Cronometro from '@/components/examenes/Cronometro';
 
 interface Props {
   capacitacion: any;
@@ -52,9 +53,12 @@ export default function FormularioExamenTrabajador({ capacitacion, onVolver }: P
 
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-bold">
-        Examen: <span className="text-blue-700">{capacitacion.titulo}</span>
-      </h2>
+      <div className="flex justify-between items-center">
+        <h2 className="text-2xl font-bold">
+          Examen: <span className="text-blue-700">{capacitacion.titulo}</span>
+        </h2>
+        <Cronometro duracionMinutos={20} onTiempoFinalizado={handleSubmit} />
+      </div>
 
       {cargando ? (
         <p>Cargando preguntas...</p>

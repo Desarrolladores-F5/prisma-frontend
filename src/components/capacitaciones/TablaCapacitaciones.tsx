@@ -98,14 +98,24 @@ export default function TablaCapacitaciones({ refrescar, onEditar, onEliminado }
                   </a>
                 )}
                 {!!cap.examen?.id && (
-                  <button
-                    onClick={() =>
-                      router.push(`/admin/dashboard/examenes/${cap.examen!.id}/preguntas`)
-                    }
-                    className="bg-indigo-600 text-white px-2 py-1 rounded text-sm hover:bg-indigo-700"
-                  >
-                    Preguntas
-                  </button>
+                  <>
+                    <button
+                      onClick={() =>
+                        router.push(`/admin/dashboard/examenes/${cap.examen!.id}/preguntas`)
+                      }
+                      className="bg-indigo-600 text-white px-2 py-1 rounded text-sm hover:bg-indigo-700"
+                    >
+                      Preguntas
+                    </button>
+                    <button
+                      onClick={() =>
+                        router.push(`/admin/dashboard/capacitaciones/respuestas/${cap.id}`)
+                      }
+                      className="bg-green-600 text-white px-2 py-1 rounded text-sm hover:bg-green-700"
+                    >
+                      Resultado
+                    </button>
+                  </>
                 )}
                 <button
                   onClick={() => onEditar?.(cap)}

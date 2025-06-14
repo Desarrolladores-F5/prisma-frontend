@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { obtenerCapacitaciones } from '@/lib/api';
 
 interface Capacitacion {
@@ -20,10 +21,14 @@ interface Capacitacion {
     nombre: string;
     url: string;
   };
+  examen?: {
+    id: number;
+  } | null;
 }
 
 export default function TablaCapacitacionesSupervisor() {
   const [capacitaciones, setCapacitaciones] = useState<Capacitacion[]>([]);
+  const router = useRouter();
 
   const cargarCapacitaciones = async () => {
     const data = await obtenerCapacitaciones();
@@ -45,7 +50,7 @@ export default function TablaCapacitacionesSupervisor() {
             <th className="border p-2">Fecha</th>
             <th className="border p-2">Capacitador</th>
             <th className="border p-2">Faena</th>
-            <th className="border p-2">Documento</th>
+            <th className="border p-2">Acciones</th>
           </tr>
         </thead>
         <tbody>
@@ -60,18 +65,36 @@ export default function TablaCapacitacionesSupervisor() {
                   : '—'}
               </td>
               <td className="p-2">{cap.faena?.nombre || '—'}</td>
-              <td className="p-2 text-center">
-                {cap.documento?.url ? (
+              <td className="p-2 space-x-2">
+                {cap.documento?.url && (
                   <a
                     href={`${process.env.NEXT_PUBLIC_API_URL}${cap.documento.url}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="bg-blue-600 text-white px-2 py-1 rounded text-sm hover:bg-blue-700"
                   >
-                    Ver Documento
+                    Ver
                   </a>
-                ) : (
-                  '—'
+                )}
+                {!!cap.examen?.id && (
+                  <>
+                    <button
+                      onClick={() =>
+                        router.push(`/supervisor/dashboard/examenes/${cap.examen!.id}/preguntas`)
+                      }
+                      className="bg-indigo-600 text-white px-2 py-1 rounded text-sm hover:bg-indigo-700"
+                    >
+                      Preguntas
+                    </button>
+                    <button
+                      onClick={() =>
+                        router.push(`/supervisor/dashboard/capacitaciones/respuestas/${cap.id}`)
+                      }
+                      className="bg-green-600 text-white px-2 py-1 rounded text-sm hover:bg-green-700"
+                    >
+                      Resultado
+                    </button>
+                  </>
                 )}
               </td>
             </tr>

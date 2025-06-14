@@ -2,8 +2,11 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+
 import { obtenerRolDesdeToken, obtenerNombreDesdeToken } from '@/lib/validate-role';
 import { useLogout } from '@/hooks/useLogout';
+
 import {
   obtenerTotalReportesActivos,
   obtenerTotalAuditorias,
@@ -21,6 +24,8 @@ import Header from '@/components/layout/Header';
 
 export default function AdminDashboard() {
   const router = useRouter();
+  const { cerrarSesion } = useLogout();
+
   const [permitido, setPermitido] = useState(false);
   const [nombreUsuario, setNombreUsuario] = useState('');
 
@@ -31,10 +36,8 @@ export default function AdminDashboard() {
   const [totalDocumentos, setTotalDocumentos] = useState(0);
   const [totalMedidas, setTotalMedidas] = useState(0);
   const [totalInspecciones, setTotalInspecciones] = useState(0);
-  const [totalProtocolos, setTotalProtocolos] = useState(0); 
+  const [totalProtocolos, setTotalProtocolos] = useState(0);
   const [totalNotificaciones, setTotalNotificaciones] = useState(0);
-
-  const { cerrarSesion } = useLogout();
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -75,15 +78,33 @@ export default function AdminDashboard() {
       <Header nombreUsuario={nombreUsuario} onLogout={cerrarSesion} />
 
       <div className="grid grid-cols-2 md:grid-cols-3 gap-6 mb-10">
-        <DashboardCard title="Usuarios" value={totalUsuarios.toString()} icon="👥" />
-        <DashboardCard title="Reportes" value={totalReportes.toString()} icon="📊" />
-        <DashboardCard title="Protocolos" value={totalProtocolos.toString()} icon="⚠️" /> 
-        <DashboardCard title="Auditorías" value={totalAuditorias.toString()} icon="📋" />
-        <DashboardCard title="Inspecciones" value={totalInspecciones.toString()} icon="🔍" />
-        <DashboardCard title="Capacitaciones" value={totalCapacitaciones.toString()} icon="🎓" />
-        <DashboardCard title="Documentos" value={totalDocumentos.toString()} icon="📑" />
-        <DashboardCard title="Medidas Correctivas" value={totalMedidas.toString()} icon="🛠️" />
-        <DashboardCard title="Notificaciones" value={totalNotificaciones.toString()} icon="🔔" />
+        <Link href="/admin/dashboard/usuarios" className="block">
+          <DashboardCard title="Usuarios" value={totalUsuarios.toString()} icon="👥" />
+        </Link>
+        <Link href="/admin/dashboard/reportes" className="block">
+          <DashboardCard title="Reportes" value={totalReportes.toString()} icon="📊" />
+        </Link>
+        <Link href="/admin/dashboard/protocolos" className="block">
+          <DashboardCard title="Protocolos" value={totalProtocolos.toString()} icon="⚠️" />
+        </Link>
+        <Link href="/admin/dashboard/auditorias" className="block">
+          <DashboardCard title="Auditorías" value={totalAuditorias.toString()} icon="📋" />
+        </Link>
+        <Link href="/admin/dashboard/inspecciones" className="block">
+          <DashboardCard title="Inspecciones" value={totalInspecciones.toString()} icon="🔍" />
+        </Link>
+        <Link href="/admin/dashboard/capacitaciones" className="block">
+          <DashboardCard title="Capacitaciones" value={totalCapacitaciones.toString()} icon="🎓" />
+        </Link>
+        <Link href="/admin/dashboard/documentos" className="block">
+          <DashboardCard title="Documentos" value={totalDocumentos.toString()} icon="📑" />
+        </Link>
+        <Link href="/admin/dashboard/medidas" className="block">
+          <DashboardCard title="Medidas Correctivas" value={totalMedidas.toString()} icon="🛠️" />
+        </Link>
+        <Link href="/admin/dashboard/notificaciones" className="block">
+          <DashboardCard title="Notificaciones" value={totalNotificaciones.toString()} icon="🔔" />
+        </Link>
       </div>
 
       <SectionPlaceholder title="Auditorías recientes" />
