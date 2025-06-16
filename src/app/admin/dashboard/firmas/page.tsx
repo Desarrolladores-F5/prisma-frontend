@@ -16,8 +16,8 @@ export default function PageFirmas() {
   const [entidadTipo, setEntidadTipo] = useState<string>('');
 
   useEffect(() => {
-    const id = searchParams.get('entidadId');
-    const tipo = searchParams.get('entidadTipo');
+    const id = searchParams?.get('entidadId');
+    const tipo = searchParams?.get('entidadTipo');
 
     if (id && tipo) {
       setEntidadId(parseInt(id));
@@ -56,7 +56,11 @@ export default function PageFirmas() {
                 Volver al Inicio
               </button>
               <button
-                onClick={() => router.push('/admin/dashboard/firmas?entidadId=1&entidadTipo=inspeccion')}
+                onClick={() =>
+                  router.push(
+                    '/admin/dashboard/firmas?entidadId=1&entidadTipo=inspeccion'
+                  )
+                }
                 className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
               >
                 Firmar Documento

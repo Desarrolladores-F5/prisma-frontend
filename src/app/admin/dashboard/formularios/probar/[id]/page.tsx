@@ -3,16 +3,17 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import RenderFormulario from '@/components/formularios/RenderFormulario';
+import { enviarRespuestaFormulario } from '@/lib/api';
 
 interface CampoFormulario {
-  label: string;
-  name: string;
-  type: 'text' | 'date' | 'checkbox' | 'textarea';
-  required?: boolean;
+  etiqueta: string;
+  nombre: string;
+  tipo: 'text' | 'date' | 'checkbox' | 'textarea';
+  requerido: boolean;
 }
 
 export default function ProbarFormularioPage() {
-  const { id } = useParams();
+  const params = useParams() as { id: string };
   const router = useRouter();
   const [estructura, setEstructura] = useState<CampoFormulario[] | null>(null);
   const [titulo, setTitulo] = useState('');
@@ -23,7 +24,7 @@ export default function ProbarFormularioPage() {
     const cargarFormulario = async () => {
       try {
         const token = localStorage.getItem('token');
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/formularios/${id}`, {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/formularios/${params.id}`, {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json',
@@ -33,9 +34,12 @@ export default function ProbarFormularioPage() {
         if (!res.ok) throw new Error('No se pudo cargar el formulario');
 
         const data = await res.json();
+        const estructuraValida = typeof data.estructura_json === 'string'
+          ? JSON.parse(data.estructura_json)
+          : data.estructura_json;
 
-        if (Array.isArray(data.estructura_json)) {
-          setEstructura(data.estructura_json);
+        if (Array.isArray(estructuraValida)) {
+          setEstructura(estructuraValida);
           setTitulo(data.nombre);
         } else {
           setMensaje('⚠️ El campo estructura_json no contiene un arreglo válido.');
@@ -48,12 +52,17 @@ export default function ProbarFormularioPage() {
       }
     };
 
-    if (id) cargarFormulario();
-  }, [id]);
+    if (params.id) cargarFormulario();
+  }, [params.id]);
 
-  const manejarEnvio = (datos: Record<string, any>) => {
-    console.log('✅ Datos enviados:', datos);
-    setMensaje('✅ Respuestas registradas localmente (no guardadas en DB).');
+  const manejarEnvio = async (datos: Record<string, any>) => {
+    try {
+      await enviarRespuestaFormulario({ formulario_id: parseInt(params.id), respuestas_json: datos });
+      setMensaje('✅ Respuestas registradas correctamente.');
+    } catch (error) {
+      console.error('❌ Error al guardar respuestas:', error);
+      setMensaje('❌ No se pudo registrar la respuesta.');
+    }
   };
 
   return (
@@ -70,6 +79,7 @@ export default function ProbarFormularioPage() {
 
       {titulo && <h2 className="text-lg font-semibold mb-2">{titulo}</h2>}
       {mensaje && <p className="text-sm text-blue-700 mb-4">{mensaje}</p>}
+
       {cargando ? (
         <p>Cargando formulario...</p>
       ) : estructura ? (

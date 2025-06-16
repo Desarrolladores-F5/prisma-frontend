@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { obtenerIdDesdeToken } from '@/lib/validate-role';
 
 interface RespuestaFormulario {
   id: number;
@@ -16,6 +17,7 @@ interface Props {
 export default function TablaRespuestasFormulario({ formularioId }: Props) {
   const [respuestas, setRespuestas] = useState<RespuestaFormulario[]>([]);
   const [mensaje, setMensaje] = useState('');
+  const [usuarioId, setUsuarioId] = useState<number | null>(null);
 
   useEffect(() => {
     const cargar = async () => {
@@ -44,6 +46,11 @@ export default function TablaRespuestasFormulario({ formularioId }: Props) {
     if (formularioId) cargar();
   }, [formularioId]);
 
+  useEffect(() => {
+    const idUsuario = obtenerIdDesdeToken(localStorage.getItem('token') || '');
+    setUsuarioId(idUsuario);
+  }, []);
+
   return (
     <div className="p-4 border rounded bg-white shadow">
       <h2 className="text-xl font-semibold mb-4">Respuestas Registradas</h2>
@@ -52,7 +59,7 @@ export default function TablaRespuestasFormulario({ formularioId }: Props) {
       {respuestas.length === 0 ? (
         <p>No hay respuestas registradas para este formulario.</p>
       ) : (
-        <table className="min-w-full text-sm border border-gray-300">
+        <table className="min-w-full text-sm border border-gray-300 mb-6">
           <thead className="bg-gray-100">
             <tr>
               <th className="border px-3 py-2">ID</th>

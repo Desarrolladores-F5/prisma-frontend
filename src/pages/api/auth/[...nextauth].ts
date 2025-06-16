@@ -25,12 +25,14 @@ export default NextAuth({
 
           if (res.ok && user?.token) {
             const payload = JSON.parse(atob(user.token.split('.')[1]));
+
             return {
               id: payload.id,
               nombre: user.usuario?.nombre,
               correo: user.usuario?.correo,
               rol_id: user.usuario?.rol_id,
               token: user.token,
+              faena_id: payload.faena_id, // ✅ faena_id desde el token
             };
           }
 
@@ -52,6 +54,7 @@ export default NextAuth({
         token.rol_id = user.rol_id;
         token.token = user.token;
         token.nombre = user.nombre;
+        token.faena_id = user.faena_id; // ✅ Propagar faena_id al token
       }
       return token;
     },
@@ -63,6 +66,7 @@ export default NextAuth({
           rol_id: token.rol_id as number,
           token: token.token as string,
           nombre: token.nombre as string,
+          faena_id: token.faena_id as number, 
         };
       }
       return session;

@@ -163,16 +163,22 @@ export const eliminarArchivoAdjunto = (id: number) =>
 
 // --- FORMULARIOS ---
 export const obtenerFormularios = () => handleFetch<any[]>(`${API_BASE}/formularios`);
+
+export const obtenerFormularioPorId = (id: number) =>
+  handleFetch<any>(`${API_BASE}/formularios/${id}`);
+
 export const crearFormulario = (data: any) =>
   handleFetch<any>(`${API_BASE}/formularios`, {
     method: 'POST',
     body: JSON.stringify(data),
   });
+
 export const actualizarFormulario = (id: number, data: any) =>
   handleFetch<any>(`${API_BASE}/formularios/${id}`, {
     method: 'PUT',
     body: JSON.stringify(data),
   });
+
 export const eliminarFormulario = (id: number) =>
   handleFetch<any>(`${API_BASE}/formularios/${id}`, {
     method: 'DELETE',
@@ -184,6 +190,7 @@ export const enviarRespuestaFormulario = (data: any) =>
     method: 'POST',
     body: JSON.stringify(data),
   });
+
 
 // --- TESTIGOS ---
 export const obtenerTestigos = () => handleFetch<any[]>(`${API_BASE}/testigos`);
@@ -218,6 +225,11 @@ export const eliminarEstadistica = (id: number) =>
   handleFetch<any>(`${API_BASE}/estadisticas/${id}`, {
     method: 'DELETE',
   });
+
+export async function obtenerTotalUsuarios(): Promise<number> {
+  const data = await handleFetch<{ total: number }>(`${API_BASE}/usuarios/conteo/total`);
+  return data.total;
+}
 
 // --- HISTORIAL DE CAMBIOS ---
 export const obtenerHistorialCambios = () =>

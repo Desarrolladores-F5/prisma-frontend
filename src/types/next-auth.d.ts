@@ -9,6 +9,7 @@ declare module 'next-auth' {
       correo?: string;
       rol_id: number;
       token: string;
+      faena_id?: number; 
     };
   }
 
@@ -18,5 +19,7 @@ declare module 'next-auth' {
     correo?: string;
     rol_id: number;
     token: string;
+    faena_id?: number; 
   }
 }
+

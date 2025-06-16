@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { signIn, useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 
 export default function LoginPage() {
@@ -11,8 +10,6 @@ export default function LoginPage() {
   const [mensajeBienvenida, setMensajeBienvenida] = useState('');
   const [error, setError] = useState('');
   const router = useRouter();
-
-  const { data: session, status } = useSession();
 
   // Mensaje de bienvenida dinámico
   useEffect(() => {
@@ -26,10 +23,28 @@ export default function LoginPage() {
     }
   }, []);
 
-  // Redirección automática por rol
-  useEffect(() => {
-    if (status === 'authenticated' && session?.user?.rol_id) {
-      switch (session.user.rol_id) {
+  // Manejo de login directo al backend
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ correo, contraseña }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) throw new Error(data.mensaje || 'Error en el login');
+
+      // Guardar token y rol en localStorage
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('rol_id', data.usuario.rol_id.toString());
+
+      // Redirigir según el rol
+      switch (data.usuario.rol_id) {
         case 1:
           router.push('/admin/dashboard');
           break;
@@ -42,24 +57,9 @@ export default function LoginPage() {
         default:
           router.push('/acceso-denegado');
       }
-    }
-  }, [status, session, router]);
-
-  // Manejo de login
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
-
-    const res = await signIn('credentials', {
-      redirect: false,
-      correo,
-      contraseña,
-    });
-
-    if (res?.ok) {
-      // Autenticación exitosa, espera a que useSession detecte el cambio
-    } else {
-      setError('❌ Credenciales inválidas o error en el servidor');
+    } catch (err: any) {
+      console.error('❌ Login fallido:', err.message);
+      setError('❌ Credenciales inválidas o error del servidor');
     }
   };
 

@@ -8,6 +8,7 @@ import { obtenerRolDesdeToken, obtenerNombreDesdeToken } from '@/lib/validate-ro
 import { useLogout } from '@/hooks/useLogout';
 
 import {
+  obtenerTotalUsuarios,
   obtenerTotalReportesActivos,
   obtenerTotalAuditorias,
   obtenerTotalCapacitaciones,
@@ -56,11 +57,8 @@ export default function AdminDashboard() {
     setPermitido(true);
     setNombreUsuario(nombre || 'Usuario');
 
-    fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/usuarios/conteo/total`)
-      .then((res) => res.json())
-      .then((data) => setTotalUsuarios(data.total || 0))
-      .catch(() => setTotalUsuarios(0));
-
+    // ✅ Usamos funciones autenticadas
+    obtenerTotalUsuarios().then(setTotalUsuarios).catch(() => setTotalUsuarios(0));
     obtenerTotalReportesActivos().then(setTotalReportes).catch(() => setTotalReportes(0));
     obtenerTotalAuditorias().then(setTotalAuditorias).catch(() => setTotalAuditorias(0));
     obtenerTotalCapacitaciones().then(setTotalCapacitaciones).catch(() => setTotalCapacitaciones(0));
