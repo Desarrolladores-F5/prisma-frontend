@@ -15,7 +15,13 @@ const FormularioFirma: React.FC<Props> = ({ entidadId, entidadTipo, onFirmado })
   const [procesando, setProcesando] = useState(false);
 
   useEffect(() => {
-    const idUsuario = obtenerIdDesdeToken(localStorage.getItem('token') || '');
+    const token = localStorage.getItem('token');
+    if (!token) {
+      console.error('❌ Token no encontrado en localStorage');
+      return;
+    }
+
+    const idUsuario = obtenerIdDesdeToken(token);
     setFirmanteId(idUsuario);
   }, []);
 
@@ -39,23 +45,32 @@ const FormularioFirma: React.FC<Props> = ({ entidadId, entidadTipo, onFirmado })
   };
 
   const handleFirmar = async () => {
-    if (!firmanteId) return;
+    if (firmanteId === null) {
+      console.error('❌ firmanteId no disponible');
+      alert('No se pudo obtener tu ID de usuario. Reintenta iniciar sesión.');
+      return;
+    }
+
     setProcesando(true);
 
-    const hash = await generarHash();
-    const metadata = obtenerMetadata();
-
     try {
-      await crearFirma({
+      const hash = await generarHash();
+      const metadata = obtenerMetadata();
+
+      const firmaPayload = {
         firmante_id: firmanteId,
         hash_firma: hash,
         tipo_firma: 'validacion',
         metadata,
-      });
+      };
 
+      console.log('📤 Enviando firma digital:', firmaPayload);
+
+      await crearFirma(firmaPayload);
       onFirmado();
     } catch (error) {
       console.error('❌ Error al firmar:', error);
+      alert('Ocurrió un error al registrar la firma digital.');
     } finally {
       setProcesando(false);
     }
@@ -66,7 +81,7 @@ const FormularioFirma: React.FC<Props> = ({ entidadId, entidadTipo, onFirmado })
       <h2 className="text-lg font-semibold mb-4">Firmar electrónicamente</h2>
       <button
         onClick={handleFirmar}
-        disabled={procesando || !firmanteId}
+        disabled={procesando || firmanteId === null}
         className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 disabled:opacity-50"
       >
         {procesando ? 'Procesando...' : 'Firmar'}

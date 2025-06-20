@@ -13,7 +13,7 @@ interface CampoFormulario {
   opciones?: string[];
 }
 
-export default function ProbarFormularioPage() {
+export default function ResponderFormularioSupervisorPage() {
   const params = useParams() as { id: string };
   const router = useRouter();
   const [estructura, setEstructura] = useState<CampoFormulario[] | null>(null);
@@ -56,7 +56,7 @@ export default function ProbarFormularioPage() {
     if (params.id) cargarFormulario();
   }, [params.id]);
 
-  const manejarEnvio = async (datos: Record<string, any>) => {
+  const manejarEnvio = async (datos: Record<string, any>): Promise<number> => {
     try {
       const respuesta = await enviarRespuestaFormulario({
         formulario_id: parseInt(params.id),
@@ -65,7 +65,7 @@ export default function ProbarFormularioPage() {
 
       const id = respuesta.id;
       setMensaje('✅ Respuestas registradas correctamente.');
-      return id; // ✅ Esto se usa para mostrar el botón de firma en RenderFormulario
+      return id; // ✅ Retornar el ID es obligatorio para que RenderFormulario funcione correctamente
     } catch (error) {
       console.error('❌ Error al guardar respuestas:', error);
       setMensaje('❌ No se pudo registrar la respuesta.');
@@ -76,9 +76,9 @@ export default function ProbarFormularioPage() {
   return (
     <div className="p-6 max-w-3xl mx-auto">
       <div className="flex justify-between items-center mb-4">
-        <h1 className="text-2xl font-bold">Probar Formulario</h1>
+        <h1 className="text-2xl font-bold">Responder Formulario</h1>
         <button
-          onClick={() => router.push('/admin/dashboard/formularios')}
+          onClick={() => router.push('/supervisor/formularios')}
           className="bg-gray-800 text-white px-4 py-2 rounded hover:bg-gray-900"
         >
           Volver al Listado

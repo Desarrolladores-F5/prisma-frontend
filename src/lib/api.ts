@@ -191,6 +191,11 @@ export const enviarRespuestaFormulario = (data: any) =>
     body: JSON.stringify(data),
   });
 
+export const obtenerRespuestaPorId = (id: number) =>
+  handleFetch<any>(`${API_BASE}/respuestas-formulario/${id}`);
+
+export const obtenerMisRespuestasFormulario = () =>
+  handleFetch<any[]>(`${API_BASE}/respuestas-formulario/mis-respuestas`);
 
 // --- TESTIGOS ---
 export const obtenerTestigos = () => handleFetch<any[]>(`${API_BASE}/testigos`);
