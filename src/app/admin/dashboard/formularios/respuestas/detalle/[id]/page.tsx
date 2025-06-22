@@ -4,8 +4,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { obtenerRespuestaPorId } from '@/lib/api';
-import jsPDF from 'jspdf';
-import autoTable from 'jspdf-autotable';
 
 interface Usuario {
   id: number;
@@ -44,46 +42,32 @@ export default function DetalleRespuestaPage() {
     if (id) cargar();
   }, [id]);
 
-  const generarPDF = () => {
-    if (!respuesta) return;
+  const generarPDF = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/respuestas-formulario/pdf/${id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
-    const doc = new jsPDF();
+      if (!response.ok) throw new Error('Error al generar el PDF');
 
-    doc.setFontSize(16);
-    doc.text(`Detalle de Respuesta #${respuesta.id}`, 14, 20);
-
-    doc.setFontSize(12);
-    doc.text(`Formulario ID: ${respuesta.formulario_id}`, 14, 30);
-    doc.text(
-      `Usuario: ${respuesta.usuario?.nombre ?? '—'} ${respuesta.usuario?.apellido ?? ''}`,
-      14,
-      38
-    );
-    doc.text(`Fecha: ${new Date(respuesta.fecha_respuesta).toLocaleString()}`, 14, 46);
-    doc.text(`Estado de Firma: ${respuesta.estado_firma}`, 14, 54);
-
-    const body = Object.entries(respuesta.respuestas_json).map(([campo, valor]) => {
-      const campoFormateado = campo.charAt(0).toUpperCase() + campo.slice(1);
-      const respuestaFormateada =
-        campo.toLowerCase() === 'conforme'
-          ? valor
-            ? '✔ Conforme'
-            : '✘ No conforme'
-          : typeof valor === 'object'
-          ? JSON.stringify(valor)
-          : String(valor);
-      return [campoFormateado, respuestaFormateada];
-    });
-
-    autoTable(doc, {
-      startY: 65,
-      head: [['Campo', 'Respuesta']],
-      body,
-      styles: { fontSize: 10 },
-      headStyles: { fillColor: [40, 60, 100] }
-    });
-
-    doc.save(`respuesta_formulario_${respuesta.id}.pdf`);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `respuesta_formulario_${id}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (error) {
+      console.error('❌ Error al descargar PDF:', error);
+      alert('No se pudo descargar el PDF firmado.');
+    }
   };
 
   return (

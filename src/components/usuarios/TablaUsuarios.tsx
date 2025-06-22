@@ -137,6 +137,7 @@ export default function TablaUsuarios({ onEditar, onEliminado, refrescar }: Prop
             <th className="p-2">Fecha Contrato</th>
             <th className="p-2">Rol</th>
             <th className="p-2">Faena</th>
+            <th className="p-2">Firma</th>
             <th className="p-2">Estado</th>
             <th className="p-2">Acciones</th>
           </tr>
@@ -150,9 +151,18 @@ export default function TablaUsuarios({ onEditar, onEliminado, refrescar }: Prop
               <td className="p-2">{u.correo}</td>
               <td className="p-2">{u.telefono || '-'}</td>
               <td className="p-2">{u.tipo_contrato || '-'}</td>
-              <td className="p-2">{u.fecha_contrato ? new Date(u.fecha_contrato).toLocaleDateString('es-CL') : '-'}</td>
+              <td className="p-2">
+                {u.fecha_contrato ? new Date(u.fecha_contrato).toLocaleDateString('es-CL') : '-'}
+              </td>
               <td className="p-2">{u.rol?.nombre}</td>
               <td className="p-2">{u.faena?.nombre || '-'}</td>
+              <td className="p-2">
+                {u.firma_imagen_url ? (
+                  <span className="text-green-600 font-medium">Sí</span>
+                ) : (
+                  <span className="text-red-500 font-medium">No</span>
+                )}
+              </td>
               <td className="p-2">
                 {u.activo ? (
                   <span className="text-green-600 font-medium">Activo</span>

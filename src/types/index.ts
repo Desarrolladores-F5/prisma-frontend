@@ -13,6 +13,7 @@ export interface Usuario {
   faena_id?: number;
   activo: boolean;
   fecha_creacion: string;
+  firma_imagen_url?: string;
 
   rol?: {
     id: number;

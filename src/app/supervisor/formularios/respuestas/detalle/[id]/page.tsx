@@ -2,9 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { obtenerRespuestaPorId } from '@/lib/api';
-import jsPDF from 'jspdf';
-import autoTable from 'jspdf-autotable';
+import { obtenerRespuestaPorId, descargarPDFRespuestaFormulario } from '@/lib/api';
 
 interface Usuario {
   id: number;
@@ -46,45 +44,12 @@ export default function DetalleRespuestaSupervisor() {
     if (!isNaN(id) && id > 0) cargar();
   }, [id]);
 
-  const generarPDF = () => {
-    if (!respuesta) return;
-
-    const doc = new jsPDF();
-    doc.setFontSize(16);
-    doc.text(`Detalle de Respuesta #${respuesta.id}`, 14, 20);
-
-    doc.setFontSize(12);
-    doc.text(`Formulario ID: ${respuesta.formulario_id}`, 14, 30);
-    doc.text(
-      `Usuario: ${respuesta.usuario?.nombre ?? '—'} ${respuesta.usuario?.apellido ?? ''}`,
-      14,
-      38
-    );
-    doc.text(`Fecha: ${new Date(respuesta.fecha_respuesta).toLocaleString()}`, 14, 46);
-    doc.text(`Estado de Firma: ${respuesta.estado_firma}`, 14, 54);
-
-    const body = Object.entries(respuesta.respuestas_json).map(([campo, valor]) => {
-      const campoFormateado = campo.charAt(0).toUpperCase() + campo.slice(1);
-      const respuestaFormateada =
-        campo.toLowerCase() === 'conforme'
-          ? valor
-            ? '✔ Conforme'
-            : '✘ No conforme'
-          : typeof valor === 'object'
-          ? JSON.stringify(valor)
-          : String(valor);
-      return [campoFormateado, respuestaFormateada];
-    });
-
-    autoTable(doc, {
-      startY: 65,
-      head: [['Campo', 'Respuesta']],
-      body,
-      styles: { fontSize: 10 },
-      headStyles: { fillColor: [40, 60, 100] }
-    });
-
-    doc.save(`respuesta_formulario_${respuesta.id}.pdf`);
+  const manejarDescargaPDF = async () => {
+    try {
+      await descargarPDFRespuestaFormulario(id);
+    } catch (error) {
+      alert('❌ No se pudo descargar el PDF firmado.');
+    }
   };
 
   return (
@@ -100,7 +65,7 @@ export default function DetalleRespuestaSupervisor() {
           </button>
           {respuesta && (
             <button
-              onClick={generarPDF}
+              onClick={manejarDescargaPDF}
               className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
             >
               Descargar PDF
@@ -133,14 +98,14 @@ export default function DetalleRespuestaSupervisor() {
             </thead>
             <tbody>
               {Object.entries(respuesta.respuestas_json).map(([campo, valor]) => {
-                let valorFormateado;
-                if (campo.toLowerCase() === 'conforme') {
-                  valorFormateado = valor ? '✔ Conforme' : '✘ No conforme';
-                } else if (typeof valor === 'object') {
-                  valorFormateado = JSON.stringify(valor);
-                } else {
-                  valorFormateado = String(valor);
-                }
+                const valorFormateado =
+                  campo.toLowerCase() === 'conforme'
+                    ? valor
+                      ? '✔ Conforme'
+                      : '✘ No conforme'
+                    : typeof valor === 'object'
+                    ? JSON.stringify(valor)
+                    : String(valor);
 
                 return (
                   <tr key={campo} className="border-t">

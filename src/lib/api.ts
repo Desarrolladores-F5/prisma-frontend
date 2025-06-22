@@ -30,14 +30,46 @@ async function handleFetch<T>(url: string, options: RequestInit = {}): Promise<T
 
 // --- USUARIOS ---
 export const obtenerUsuarios = () => handleFetch<any[]>(`${API_BASE}/usuarios`);
-export const crearUsuario = (data: any) => handleFetch<any>(`${API_BASE}/usuarios`, { method: 'POST', body: JSON.stringify(data) });
-export const actualizarUsuario = (id: number, data: any) => handleFetch<any>(`${API_BASE}/usuarios/${id}`, { method: 'PUT', body: JSON.stringify(data) });
-export const eliminarUsuario = (id: number) => handleFetch<any>(`${API_BASE}/usuarios/${id}`, { method: 'DELETE' });
 
-// ✅ Nuevo método para supervisor
+export const crearUsuario = async (data: any): Promise<any> => {
+  const token = getToken();
+
+  const formData = new FormData();
+  for (const key in data) {
+    if (data[key] !== null && data[key] !== undefined) {
+      formData.append(key, data[key]);
+    }
+  }
+
+  try {
+    const res = await fetch(`${API_BASE}/usuarios`, {
+      method: 'POST',
+      headers: {
+        ...(token && { Authorization: `Bearer ${token}` }),
+      },
+      body: formData,
+    });
+
+    if (!res.ok) {
+      const errorBody = await res.json().catch(() => ({}));
+      throw new Error(errorBody?.mensaje || `Error ${res.status}`);
+    }
+
+    return await res.json();
+  } catch (error: any) {
+    console.error(`❌ Error al crear usuario con firma:`, error.message);
+    throw error;
+  }
+};
+
+export const actualizarUsuario = (id: number, data: any) =>
+  handleFetch<any>(`${API_BASE}/usuarios/${id}`, { method: 'PUT', body: JSON.stringify(data) });
+
+export const eliminarUsuario = (id: number) =>
+  handleFetch<any>(`${API_BASE}/usuarios/${id}`, { method: 'DELETE' });
+
 export const obtenerUsuariosPorFaena = (faenaId: number) =>
   handleFetch<any[]>(`${API_BASE}/usuarios/faena/${faenaId}`);
-
 
 // --- REPORTES ---
 export const obtenerReportes = () => handleFetch<any[]>(`${API_BASE}/reportes`);
@@ -196,6 +228,39 @@ export const obtenerRespuestaPorId = (id: number) =>
 
 export const obtenerMisRespuestasFormulario = () =>
   handleFetch<any[]>(`${API_BASE}/respuestas-formulario/mis-respuestas`);
+
+// --- RESPUESTAS DE FORMULARIO: Descargar PDF ---
+export const descargarPDFRespuestaFormulario = async (id: number) => {
+  const token = getToken();
+  const url = `${API_BASE}/respuestas-formulario/pdf/${id}`;
+
+  try {
+    const res = await fetch(url, {
+      method: 'GET',
+      headers: {
+        ...(token && { Authorization: `Bearer ${token}` }),
+      },
+    });
+
+    if (!res.ok) {
+      const errorBody = await res.json().catch(() => ({}));
+      throw new Error(errorBody?.mensaje || `Error ${res.status}`);
+    }
+
+    // ✅ Convertir respuesta a blob (PDF)
+    const blob = await res.blob();
+    const urlBlob = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = urlBlob;
+    link.setAttribute('download', `respuesta_formulario_${id}.pdf`);
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+  } catch (error: any) {
+    console.error(`❌ Error al descargar PDF de respuesta:`, error.message);
+    throw error;
+  }
+};
 
 // --- TESTIGOS ---
 export const obtenerTestigos = () => handleFetch<any[]>(`${API_BASE}/testigos`);

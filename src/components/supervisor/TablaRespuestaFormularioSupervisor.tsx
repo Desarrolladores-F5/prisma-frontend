@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { obtenerIdDesdeToken } from '@/lib/validate-role';
+import { descargarPDFRespuestaFormulario } from '@/lib/api';
 
 interface RespuestaFormulario {
   id: number;
@@ -39,8 +40,6 @@ export default function TablaRespuestaFormularioSupervisor({ formularioId }: Pro
 
         if (!res.ok) throw new Error('Error al obtener respuestas');
         const data = await res.json();
-
-        // Filtrar por formulario_id
         const filtradas = data.filter((r: RespuestaFormulario) => r.formulario_id === formularioId);
         setRespuestas(filtradas);
       } catch (error) {
@@ -56,6 +55,14 @@ export default function TablaRespuestaFormularioSupervisor({ formularioId }: Pro
     const id = obtenerIdDesdeToken(localStorage.getItem('token') || '');
     setUsuarioId(id);
   }, []);
+
+  const manejarDescargaPDF = async (id: number) => {
+    try {
+      await descargarPDFRespuestaFormulario(id);
+    } catch (error) {
+      alert('No se pudo descargar el PDF');
+    }
+  };
 
   return (
     <div className="p-4 border rounded bg-white shadow">
@@ -73,6 +80,7 @@ export default function TablaRespuestaFormularioSupervisor({ formularioId }: Pro
               <th className="border px-3 py-2">Estado Firma</th>
               <th className="border px-3 py-2">Respuestas</th>
               <th className="border px-3 py-2">Detalle</th>
+              <th className="border px-3 py-2">Descargar PDF</th>
             </tr>
           </thead>
           <tbody>
@@ -107,11 +115,19 @@ export default function TablaRespuestaFormularioSupervisor({ formularioId }: Pro
                 </td>
                 <td className="px-3 py-2 text-center">
                   <Link
-                    href={`/supervisor/formularios/respuestas/detalle/${r.id}`} // ✅ ruta corregida
+                    href={`/supervisor/formularios/respuestas/detalle/${r.id}`}
                     className="bg-indigo-600 text-white px-3 py-1 rounded hover:bg-indigo-700 text-sm font-medium"
                   >
                     Ver Detalle
                   </Link>
+                </td>
+                <td className="px-3 py-2 text-center">
+                  <button
+                    onClick={() => manejarDescargaPDF(r.id)}
+                    className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 text-sm font-medium"
+                  >
+                    PDF
+                  </button>
                 </td>
               </tr>
             ))}
