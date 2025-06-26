@@ -1,4 +1,8 @@
 // src/lib/api.ts
+import type { Documento } from '@/types';
+import type { Notificacion } from '@/types';
+
+
 const API_BASE = `${process.env.NEXT_PUBLIC_API_URL}/api`;
 
 const getToken = () => (typeof window !== 'undefined' ? localStorage.getItem('token') : null);
@@ -151,17 +155,30 @@ export const crearEPP = (data: any) => handleFetch<any>(`${API_BASE}/epp`, { met
 export const actualizarEPP = (id: number, data: any) => handleFetch<any>(`${API_BASE}/epp/${id}`, { method: 'PUT', body: JSON.stringify(data) });
 export const eliminarEPP = (id: number) => handleFetch<any>(`${API_BASE}/epp/${id}`, { method: 'DELETE' });
 
+// --- EPP asignados por trabajador autenticado ---
+export const obtenerEppAsignados = () =>
+  handleFetch<any[]>(`${API_BASE}/epp/mis-epp`);
+
+
 // --- DOCUMENTOS ---
 export const obtenerDocumentos = () => handleFetch<any[]>(`${API_BASE}/documentos`);
 export const crearDocumento = (data: any) => handleFetch<any>(`${API_BASE}/documentos`, { method: 'POST', body: JSON.stringify(data) });
 export const actualizarDocumento = (id: number, data: any) => handleFetch<any>(`${API_BASE}/documentos/${id}`, { method: 'PUT', body: JSON.stringify(data) });
 export const eliminarDocumento = (id: number) => handleFetch<any>(`${API_BASE}/documentos/${id}`, { method: 'DELETE' });
 
+export async function obtenerMisDocumentos() {
+  return await handleFetch<Documento[]>(`${API_BASE}/documentos/mis-documentos`);
+}
+
 // --- NOTIFICACIONES ---
 export const obtenerNotificaciones = () => handleFetch<any[]>(`${API_BASE}/notificaciones`);
 export const crearNotificacion = (data: any) => handleFetch<any>(`${API_BASE}/notificaciones`, { method: 'POST', body: JSON.stringify(data) });
 export const actualizarNotificacion = (id: number, data: any) => handleFetch<any>(`${API_BASE}/notificaciones/${id}`, { method: 'PUT', body: JSON.stringify(data) });
 export const eliminarNotificacion = (id: number) => handleFetch<any>(`${API_BASE}/notificaciones/${id}`, { method: 'DELETE' });
+
+export async function obtenerMisNotificaciones() {
+  return await handleFetch<Notificacion[]>(`${API_BASE}/notificaciones/mis-notificaciones`);
+}
 
 // --- MEDIDAS CORRECTIVAS ---
 export const obtenerMedidas = () => handleFetch<any[]>(`${API_BASE}/medidas`);
@@ -180,6 +197,9 @@ export const obtenerProtocolos = () => handleFetch<any[]>(`${API_BASE}/protocolo
 export const crearProtocolo = (data: any) => handleFetch<any>(`${API_BASE}/protocolos`, { method: 'POST', body: JSON.stringify(data) });
 export const actualizarProtocolo = (id: number, data: any) => handleFetch<any>(`${API_BASE}/protocolos/${id}`, { method: 'PUT', body: JSON.stringify(data) });
 export const eliminarProtocolo = (id: number) => handleFetch<any>(`${API_BASE}/protocolos/${id}`, { method: 'DELETE' });
+
+export const obtenerMisProtocolos = () => 
+  handleFetch<any[]>(`${API_BASE}/protocolos/mis-protocolos`);
 
 // --- FIRMAS DIGITALES ---
 export const obtenerFirmas = () => handleFetch<any[]>(`${API_BASE}/firmas`);
