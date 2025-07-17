@@ -70,7 +70,7 @@ export default function TablaDocumentos({ refrescar, onEditar, onEliminado }: Pr
               <td className="p-2">{doc.nombre}</td>
               <td className="p-2">{doc.tipo}</td>
               <td className="p-2">{doc.version}</td>
-              <td className="p-2">{new Date(doc.fecha_creacion).toLocaleDateString()}</td>
+              <td className="p-2">{new Date(doc.fecha_creacion).toLocaleDateString('es-CL')}</td>
               <td className="p-2 text-center">{doc.activo ? '✅' : '❌'}</td>
               <td className="p-2 flex flex-wrap gap-2 justify-center">
                 <a
@@ -99,6 +99,18 @@ export default function TablaDocumentos({ refrescar, onEditar, onEliminado }: Pr
                   className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
                 >
                   Eliminar
+                </button>
+                <button
+                  onClick={() => router.push(`/admin/dashboard/documentos/asignar/${doc.id}`)}
+                  className="bg-purple-600 text-white px-3 py-1 rounded hover:bg-purple-700"
+                >
+                  Asignar
+                </button>
+                <button
+                  onClick={() => router.push(`/admin/dashboard/documentos/confirmaciones/${doc.id}`)}
+                  className="bg-indigo-500 text-white px-3 py-1 rounded hover:bg-indigo-600"
+                >
+                  Confirmaciones
                 </button>
               </td>
             </tr>

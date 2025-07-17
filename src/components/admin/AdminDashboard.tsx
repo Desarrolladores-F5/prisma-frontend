@@ -15,8 +15,11 @@ import {
   obtenerTotalDocumentos,
   obtenerTotalMedidasCorrectivas,
   obtenerTotalInspecciones,
-  obtenerTotalProtocolos,
-  obtenerTotalNotificaciones
+  obtenerTotalNotificaciones,
+  obtenerTotalEPP,
+  obtenerTotalFormularios,
+  obtenerTotalExamenes,
+  obtenerTotalEstadisticas
 } from '@/lib/api';
 
 import DashboardCard from '@/components/ui/DashboardCard';
@@ -37,8 +40,11 @@ export default function AdminDashboard() {
   const [totalDocumentos, setTotalDocumentos] = useState(0);
   const [totalMedidas, setTotalMedidas] = useState(0);
   const [totalInspecciones, setTotalInspecciones] = useState(0);
-  const [totalProtocolos, setTotalProtocolos] = useState(0);
   const [totalNotificaciones, setTotalNotificaciones] = useState(0);
+  const [totalEPP, setTotalEPP] = useState(0);
+  const [totalFormularios, setTotalFormularios] = useState(0);
+  const [totalExamenes, setTotalExamenes] = useState(0);
+  const [totalEstadisticas, setTotalEstadisticas] = useState(0);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -57,7 +63,6 @@ export default function AdminDashboard() {
     setPermitido(true);
     setNombreUsuario(nombre || 'Usuario');
 
-    // ✅ Usamos funciones autenticadas
     obtenerTotalUsuarios().then(setTotalUsuarios).catch(() => setTotalUsuarios(0));
     obtenerTotalReportesActivos().then(setTotalReportes).catch(() => setTotalReportes(0));
     obtenerTotalAuditorias().then(setTotalAuditorias).catch(() => setTotalAuditorias(0));
@@ -65,8 +70,11 @@ export default function AdminDashboard() {
     obtenerTotalDocumentos().then(setTotalDocumentos).catch(() => setTotalDocumentos(0));
     obtenerTotalMedidasCorrectivas().then(setTotalMedidas).catch(() => setTotalMedidas(0));
     obtenerTotalInspecciones().then(setTotalInspecciones).catch(() => setTotalInspecciones(0));
-    obtenerTotalProtocolos().then(setTotalProtocolos).catch(() => setTotalProtocolos(0));
     obtenerTotalNotificaciones().then(setTotalNotificaciones).catch(() => setTotalNotificaciones(0));
+    obtenerTotalEPP().then(setTotalEPP).catch(() => setTotalEPP(0));
+    obtenerTotalFormularios().then(setTotalFormularios).catch(() => setTotalFormularios(0));
+    obtenerTotalExamenes().then(setTotalExamenes).catch(() => setTotalExamenes(0));
+    obtenerTotalEstadisticas().then(setTotalEstadisticas).catch(() => setTotalEstadisticas(0));
   }, [router]);
 
   if (!permitido) return null;
@@ -81,9 +89,6 @@ export default function AdminDashboard() {
         </Link>
         <Link href="/admin/dashboard/reportes" className="block">
           <DashboardCard title="Reportes" value={totalReportes.toString()} icon="📊" />
-        </Link>
-        <Link href="/admin/dashboard/protocolos" className="block">
-          <DashboardCard title="Protocolos" value={totalProtocolos.toString()} icon="⚠️" />
         </Link>
         <Link href="/admin/dashboard/auditorias" className="block">
           <DashboardCard title="Auditorías" value={totalAuditorias.toString()} icon="📋" />
@@ -102,6 +107,18 @@ export default function AdminDashboard() {
         </Link>
         <Link href="/admin/dashboard/notificaciones" className="block">
           <DashboardCard title="Notificaciones" value={totalNotificaciones.toString()} icon="🔔" />
+        </Link>
+        <Link href="/admin/dashboard/epp" className="block">
+          <DashboardCard title="EPP" value={totalEPP.toString()} icon="🦺" />
+        </Link>
+        <Link href="/admin/dashboard/formularios" className="block">
+          <DashboardCard title="Formularios" value={totalFormularios.toString()} icon="📋" />
+        </Link>
+        <Link href="/admin/dashboard/examenes" className="block">
+          <DashboardCard title="Exámenes" value={totalExamenes.toString()} icon="📝" />
+        </Link>
+        <Link href="/admin/dashboard/estadisticas" className="block">
+          <DashboardCard title="Estadísticas" value={totalEstadisticas.toString()} icon="📈" />
         </Link>
       </div>
 

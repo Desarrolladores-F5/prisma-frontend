@@ -42,7 +42,6 @@ const groupedLinks = [
   {
     title: 'Procesos de Prevención',
     links: [
-      { href: '/admin/dashboard/protocolos', label: 'Protocolos', icon: ShieldAlert },
       { href: '/admin/dashboard/auditorias', label: 'Auditorías', icon: FolderKanban },
       { href: '/admin/dashboard/inspecciones', label: 'Inspecciones', icon: Search },
       { href: '/admin/dashboard/capacitaciones', label: 'Capacitaciones', icon: GraduationCap },
@@ -56,10 +55,8 @@ const groupedLinks = [
     links: [
       { href: '/admin/dashboard/notificaciones', label: 'Notificaciones', icon: Bell },
       { href: '/admin/dashboard/documentos', label: 'Documentos', icon: File },
-      { href: '/admin/dashboard/archivos', label: 'Archivos', icon: FileArchive },
       { href: '/admin/dashboard/formularios', label: 'Formularios', icon: ClipboardCheck },
       { href: '/admin/dashboard/firmas', label: 'Firmas Digitales', icon: PencilLine },
-      { href: '/admin/dashboard/testigos', label: 'Testigos', icon: Landmark },
     ]
   },
   {

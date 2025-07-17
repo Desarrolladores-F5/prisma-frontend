@@ -28,7 +28,6 @@ const groupedLinks = [
     title: 'Prevención y Formación',
     links: [
       { href: '/trabajador/capacitaciones', label: 'Capacitaciones', icon: GraduationCap },
-      { href: '/trabajador/protocolos', label: 'Protocolos', icon: ShieldAlert },
     ],
   },
   {

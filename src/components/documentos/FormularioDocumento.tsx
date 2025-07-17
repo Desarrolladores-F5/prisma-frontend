@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { crearDocumento, actualizarDocumento } from '@/lib/api';
 import { useDropzone } from 'react-dropzone';
+import { useRouter } from 'next/navigation';
 
 interface Documento {
   id?: number;
@@ -20,6 +21,7 @@ interface Props {
 
 export default function FormularioDocumento({ documento, onGuardado }: Props) {
   const modoEdicion = !!documento;
+  const router = useRouter();
 
   const [form, setForm] = useState<Documento>({
     nombre: '',
@@ -90,12 +92,14 @@ export default function FormularioDocumento({ documento, onGuardado }: Props) {
       if (modoEdicion && documento?.id) {
         await actualizarDocumento(documento.id, form);
         setMensaje('✅ Documento actualizado correctamente');
+        onGuardado?.();
       } else {
-        await crearDocumento(form);
+        const nuevo = await crearDocumento(form);
         setMensaje('✅ Documento creado correctamente');
         setForm({ nombre: '', tipo: '', url: '', version: '', activo: true });
+        // Redirige a la página de asignación
+        router.push(`/admin/dashboard/documentos/asignar/${nuevo.id}`);
       }
-      onGuardado?.();
     } catch (error) {
       setMensaje('❌ Error al guardar el documento');
     }

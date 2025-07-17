@@ -75,6 +75,9 @@ export const eliminarUsuario = (id: number) =>
 export const obtenerUsuariosPorFaena = (faenaId: number) =>
   handleFetch<any[]>(`${API_BASE}/usuarios/faena/${faenaId}`);
 
+// --- ROLES ---
+export const obtenerRoles = () => handleFetch<any[]>(`${API_BASE}/roles`);
+
 // --- REPORTES ---
 export const obtenerReportes = () => handleFetch<any[]>(`${API_BASE}/reportes`);
 export const crearReporte = (data: any) => handleFetch<any>(`${API_BASE}/reportes`, { method: 'POST', body: JSON.stringify(data) });
@@ -170,6 +173,27 @@ export async function obtenerMisDocumentos() {
   return await handleFetch<Documento[]>(`${API_BASE}/documentos/mis-documentos`);
 }
 
+export const confirmarRecepcionDocumento = (documentoId: number) =>
+  handleFetch(`${API_BASE}/documentos/recepcionar/${documentoId}`, {
+    method: 'PUT',
+  });
+
+// --- RELACIÓN DOCUMENTO - USUARIO ---
+export const asignarDocumentoAUsuario = (data: {
+  documento_id: number;
+  asignacion_tipo: 'usuarios' | 'rol' | 'todos';
+  usuario_ids?: number[];
+  rol_id?: number;
+}) =>
+  handleFetch<any>(`${API_BASE}/rel-documentos-usuarios`, {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+
+// --- Obtener documento por ID ---
+export const obtenerDocumentoPorId = (id: number) =>
+  handleFetch<any>(`${API_BASE}/documentos/${id}`);
+
 // --- NOTIFICACIONES ---
 export const obtenerNotificaciones = () => handleFetch<any[]>(`${API_BASE}/notificaciones`);
 export const crearNotificacion = (data: any) => handleFetch<any>(`${API_BASE}/notificaciones`, { method: 'POST', body: JSON.stringify(data) });
@@ -179,6 +203,12 @@ export const eliminarNotificacion = (id: number) => handleFetch<any>(`${API_BASE
 export async function obtenerMisNotificaciones() {
   return await handleFetch<Notificacion[]>(`${API_BASE}/notificaciones/mis-notificaciones`);
 }
+
+export const marcarNotificacionComoLeida = async (id: number) => {
+  return await handleFetch<any>(`${API_BASE}/notificaciones/${id}/leido`, {
+    method: 'PUT',
+  });
+};
 
 // --- MEDIDAS CORRECTIVAS ---
 export const obtenerMedidas = () => handleFetch<any[]>(`${API_BASE}/medidas`);
@@ -192,26 +222,14 @@ export const crearInspeccion = (data: any) => handleFetch<any>(`${API_BASE}/insp
 export const actualizarInspeccion = (id: number, data: any) => handleFetch<any>(`${API_BASE}/inspecciones/${id}`, { method: 'PUT', body: JSON.stringify(data) });
 export const eliminarInspeccion = (id: number) => handleFetch<any>(`${API_BASE}/inspecciones/${id}`, { method: 'DELETE' });
 
-// --- PROTOCOLOS ---
-export const obtenerProtocolos = () => handleFetch<any[]>(`${API_BASE}/protocolos`);
-export const crearProtocolo = (data: any) => handleFetch<any>(`${API_BASE}/protocolos`, { method: 'POST', body: JSON.stringify(data) });
-export const actualizarProtocolo = (id: number, data: any) => handleFetch<any>(`${API_BASE}/protocolos/${id}`, { method: 'PUT', body: JSON.stringify(data) });
-export const eliminarProtocolo = (id: number) => handleFetch<any>(`${API_BASE}/protocolos/${id}`, { method: 'DELETE' });
 
-export const obtenerMisProtocolos = () => 
-  handleFetch<any[]>(`${API_BASE}/protocolos/mis-protocolos`);
+
 
 // --- FIRMAS DIGITALES ---
 export const obtenerFirmas = () => handleFetch<any[]>(`${API_BASE}/firmas`);
 export const crearFirma = (data: any) => handleFetch<any>(`${API_BASE}/firmas`, { method: 'POST', body: JSON.stringify(data) });
 export const eliminarFirma = (id: number) => handleFetch<any>(`${API_BASE}/firmas/${id}`, { method: 'DELETE' });
 
-// --- ARCHIVOS ADJUNTOS ---
-export const obtenerArchivosAdjuntos = () => handleFetch<any[]>(`${API_BASE}/archivos`);
-export const crearArchivoAdjunto = (data: any) =>
-  handleFetch<any>(`${API_BASE}/archivos`, { method: 'POST', body: JSON.stringify(data) });
-export const eliminarArchivoAdjunto = (id: number) =>
-  handleFetch<any>(`${API_BASE}/archivos/${id}`, { method: 'DELETE' });
 
 // --- FORMULARIOS ---
 export const obtenerFormularios = () => handleFetch<any[]>(`${API_BASE}/formularios`);
@@ -405,13 +423,28 @@ export async function obtenerTotalInspecciones(): Promise<number> {
   return inspecciones.filter((i: any) => i.activo !== false).length;
 }
 
-export async function obtenerTotalProtocolos(): Promise<number> {
-  const protocolos = await obtenerProtocolos();
-  return protocolos.filter((p: any) => p.activo !== false).length;
-}
 
 export async function obtenerTotalNotificaciones(): Promise<number> {
   const notificaciones = await obtenerNotificaciones();
   return notificaciones.filter((n: any) => n.activo !== false).length;
 }
 
+export async function obtenerTotalEPP(): Promise<number> {
+  const epp = await obtenerEPP();
+  return Array.isArray(epp) ? epp.length : 0;
+}
+
+export async function obtenerTotalFormularios(): Promise<number> {
+  const formularios = await obtenerFormularios();
+  return Array.isArray(formularios) ? formularios.length : 0;
+}
+
+export async function obtenerTotalExamenes(): Promise<number> {
+  const examenes = await obtenerExamenes();
+  return Array.isArray(examenes) ? examenes.length : 0;
+}
+
+export async function obtenerTotalEstadisticas(): Promise<number> {
+  const estadisticas = await obtenerEstadisticas();
+  return Array.isArray(estadisticas) ? estadisticas.length : 0;
+}

@@ -7,12 +7,11 @@ import {
   obtenerUsuarios,
   obtenerReportes,
   obtenerCapacitaciones,
-  obtenerProtocolos,
   obtenerAuditorias,
   obtenerInspecciones,
   obtenerTotalMedidasCorrectivas,
   obtenerNotificaciones,
-  obtenerDocumentos,
+  obtenerMisDocumentos,
   obtenerFormularios
 } from '@/lib/api';
 
@@ -29,7 +28,6 @@ export default function DashboardSupervisor() {
     usuarios: 0,
     reportes: 0,
     capacitaciones: 0,
-    protocolos: 0,
     auditorias: 0,
     inspecciones: 0,
     medidas: 0,
@@ -45,7 +43,6 @@ export default function DashboardSupervisor() {
           usuarios,
           reportes,
           capacitaciones,
-          protocolos,
           auditorias,
           inspecciones,
           medidas,
@@ -56,12 +53,11 @@ export default function DashboardSupervisor() {
           obtenerUsuarios(),
           obtenerReportes(),
           obtenerCapacitaciones(),
-          obtenerProtocolos(),
           obtenerAuditorias(),
           obtenerInspecciones(),
           obtenerTotalMedidasCorrectivas(),
           obtenerNotificaciones(),
-          obtenerDocumentos(),
+          obtenerMisDocumentos(),
           obtenerFormularios()
         ]);
 
@@ -69,7 +65,6 @@ export default function DashboardSupervisor() {
           usuarios: usuarios.length,
           reportes: reportes.length,
           capacitaciones: capacitaciones.length,
-          protocolos: protocolos.length,
           auditorias: auditorias.length,
           inspecciones: inspecciones.length,
           medidas: medidas || 0,
@@ -89,7 +84,6 @@ export default function DashboardSupervisor() {
     { title: 'Usuarios', value: data.usuarios, icon: '👥', link: '/supervisor/usuarios' },
     { title: 'Reportes', value: data.reportes, icon: '📋', link: '/supervisor/reportes' },
     { title: 'Capacitaciones', value: data.capacitaciones, icon: '🎓', link: '/supervisor/capacitaciones' },
-    { title: 'Protocolos', value: data.protocolos, icon: '⚠️', link: '/supervisor/protocolos' },
     { title: 'Auditorías', value: data.auditorias, icon: '📂', link: '/supervisor/auditorias' },
     { title: 'Inspecciones', value: data.inspecciones, icon: '🔎', link: '/supervisor/inspecciones' },
     { title: 'Medidas Correctivas', value: data.medidas, icon: '🛠️', link: '/supervisor/medidas' },

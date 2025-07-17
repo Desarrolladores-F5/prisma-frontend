@@ -6,11 +6,10 @@ import DashboardCard from '@/components/ui/DashboardCard';
 import { useLogout } from '@/hooks/useLogout';
 import {
   obtenerMisReportes,
-  obtenerCapacitacionesDisponibles, 
+  obtenerCapacitacionesDisponibles,
   obtenerEppAsignados,
-  obtenerMisProtocolos, 
-  obtenerMisNotificaciones, 
-  obtenerDocumentos,
+  obtenerMisNotificaciones,
+  obtenerMisDocumentos,
   obtenerFormularios,
 } from '@/lib/api';
 import { obtenerNombreDesdeToken } from '@/lib/validate-role';
@@ -25,7 +24,6 @@ export default function DashboardTrabajador() {
     reportes: 0,
     capacitaciones: 0,
     epp: 0,
-    protocolos: 0,
     notificaciones: 0,
     documentos: 0,
     formularios: 0,
@@ -38,17 +36,15 @@ export default function DashboardTrabajador() {
           reportes,
           capacitaciones,
           epp,
-          protocolos,
           notificaciones,
           documentos,
           formularios,
         ] = await Promise.all([
           obtenerMisReportes(),
-          obtenerCapacitacionesDisponibles(), 
+          obtenerCapacitacionesDisponibles(),
           obtenerEppAsignados(),
-          obtenerMisProtocolos(), 
           obtenerMisNotificaciones(),
-          obtenerDocumentos(),
+          obtenerMisDocumentos(),
           obtenerFormularios(),
         ]);
 
@@ -56,7 +52,6 @@ export default function DashboardTrabajador() {
           reportes: reportes.length,
           capacitaciones: capacitaciones.length,
           epp: epp.length,
-          protocolos: protocolos.length,
           notificaciones: notificaciones.length,
           documentos: documentos.length,
           formularios: formularios.length,
@@ -71,12 +66,11 @@ export default function DashboardTrabajador() {
 
   const tarjetas = [
     { title: 'Reportes Enviados', value: data.reportes, icon: '📋', link: '/trabajador/reportes' },
-    { title: 'Capacitaciones', value: data.capacitaciones, icon: '🎓', link: '/trabajador/capacitaciones' },
+    { title: 'Mis Capacitaciones', value: data.capacitaciones, icon: '🎓', link: '/trabajador/capacitaciones' },
     { title: 'EPP Asignados', value: data.epp, icon: '👷‍♂️', link: '/trabajador/epp' },
-    { title: 'Protocolos', value: data.protocolos, icon: '⚠️', link: '/trabajador/protocolos' },
-    { title: 'Notificaciones', value: data.notificaciones, icon: '🔔', link: '/trabajador/notificaciones' },
-    { title: 'Documentos', value: data.documentos, icon: '📁', link: '/trabajador/documentos' },
-    { title: 'Formularios', value: data.formularios, icon: '📝', link: '/trabajador/formularios' },
+    { title: 'Mis Notificaciones', value: data.notificaciones, icon: '🔔', link: '/trabajador/notificaciones' },
+    { title: 'Mis Documentos', value: data.documentos, icon: '📁', link: '/trabajador/documentos' },
+    { title: 'Mis Formularios', value: data.formularios, icon: '📝', link: '/trabajador/formularios' },
   ];
 
   return (

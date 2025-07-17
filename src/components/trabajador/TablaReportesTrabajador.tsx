@@ -5,9 +5,10 @@ import { obtenerMisReportes } from '@/lib/api';
 
 interface Props {
   refrescar?: boolean;
+  onEditar?: (reporte: any) => void;
 }
 
-export default function TablaReportesTrabajador({ refrescar }: Props) {
+export default function TablaReportesTrabajador({ refrescar, onEditar }: Props) {
   const [reportes, setReportes] = useState<any[]>([]);
   const [filtroTipo, setFiltroTipo] = useState('');
   const [filtroEstado, setFiltroEstado] = useState('');
@@ -78,6 +79,7 @@ export default function TablaReportesTrabajador({ refrescar }: Props) {
                 <th className="p-2">Estado</th>
                 <th className="p-2">Faena</th>
                 <th className="p-2">Fecha</th>
+                {onEditar && <th className="p-2">Acciones</th>}
               </tr>
             </thead>
             <tbody>
@@ -92,6 +94,16 @@ export default function TablaReportesTrabajador({ refrescar }: Props) {
                       ? new Date(reporte.fecha_evento).toLocaleDateString('es-CL')
                       : '-'}
                   </td>
+                  {onEditar && (
+                    <td className="p-2">
+                      <button
+                        onClick={() => onEditar(reporte)}
+                        className="text-blue-600 hover:underline"
+                      >
+                        Editar
+                      </button>
+                    </td>
+                  )}
                 </tr>
               ))}
             </tbody>

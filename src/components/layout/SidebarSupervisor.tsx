@@ -31,7 +31,6 @@ const groupedLinks = [
     title: 'Prevención y Control',
     links: [
       { href: '/supervisor/capacitaciones', label: 'Capacitaciones', icon: GraduationCap },
-      { href: '/supervisor/protocolos', label: 'Protocolos', icon: ShieldAlert },
       { href: '/supervisor/auditorias', label: 'Auditorías', icon: FolderKanban },
       { href: '/supervisor/medidas', label: 'Medidas Correctivas', icon: ScrollText },
     ],

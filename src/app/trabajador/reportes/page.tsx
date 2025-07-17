@@ -20,7 +20,7 @@ export default function ReportesTrabajadorPage() {
     <div className="p-6">
       {!modoFormulario && (
         <div className="flex justify-between items-center mb-4">
-          <h1 className="text-2xl font-bold">Mis Reportes</h1>
+          <h1 className="text-2xl font-bold">Reportes</h1>
           <div className="flex space-x-2">
             <button
               onClick={() => router.push('/trabajador/dashboard')}

@@ -41,6 +41,7 @@ export default function TablaEppTrabajador() {
 
   return (
     <div className="overflow-x-auto bg-white rounded-xl shadow p-4">
+      <h2 className="text-lg font-semibold mb-4">Mis EPP asignados</h2>
       {mensaje ? (
         <p className="text-center text-gray-600">{mensaje}</p>
       ) : (

@@ -68,9 +68,23 @@ export interface Documento {
   tipo: string;
   url: string;
   version?: string;
-  fecha_subida: string;
+  fecha_creacion?: string;
+  fecha_subida?: string;
+  recepcionado?: boolean;
+  fecha_recepcion?: string | null;
+  fecha_asignacion?: string | null;
   activo: boolean;
-  fecha_creacion: string;
+}
+
+// --- Confirmaciones de Documentos ---
+export interface ConfirmacionDocumento {
+  id: number;
+  usuario: {
+    nombre: string;
+    apellido: string;
+    correo: string;
+  };
+  fecha_recepcion: string;
 }
 
 // --- Empresa ---
@@ -213,47 +227,6 @@ export interface Pregunta {
   examen_id: number;
 }
 
-// --- Protocolos ---
-export interface Protocolo {
-  id: number;
-  titulo: string;
-  descripcion: string;
-  tipo: string;
-  estado: string;
-  responsable_id: number;
-  empresa_id: number;
-  faena_id: number;
-  fecha_emision?: string;
-  fecha_vigencia?: string;
-  fecha_creacion: string;
-  activo: boolean;
-}
-
-export interface ProtocoloExtendido {
-  id: number;
-  nombre: string;
-  descripcion?: string;
-  version?: string;
-  vigente?: boolean;
-  fecha_emision?: string;
-  fecha_vigencia?: string;
-  fecha_creacion?: string;
-  url?: string;
-
-  faena?: {
-    id: number;
-    nombre: string;
-  };
-  empresa?: {
-    id: number;
-    nombre: string;
-  };
-  responsable?: {
-    id: number;
-    nombre: string;
-    apellido: string;
-  };
-}
 
 // --- Reportes ---
 export interface Reporte {
@@ -298,3 +271,4 @@ export interface Usuario {
     nombre: string;
   };
 }
+

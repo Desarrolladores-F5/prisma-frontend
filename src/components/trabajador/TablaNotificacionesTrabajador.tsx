@@ -1,8 +1,12 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { obtenerMisNotificaciones } from '@/lib/api';
+import {
+  obtenerMisNotificaciones,
+  marcarNotificacionComoLeida
+} from '@/lib/api';
 import type { Notificacion } from '@/types';
+import { toast } from 'sonner';
 
 export default function TablaNotificacionesTrabajador() {
   const [notificaciones, setNotificaciones] = useState<Notificacion[]>([]);
@@ -21,6 +25,17 @@ export default function TablaNotificacionesTrabajador() {
       setMensaje('Error al cargar las notificaciones.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const marcarLeida = async (id: number) => {
+    try {
+      await marcarNotificacionComoLeida(id);
+      toast.success('✅ Notificación marcada como leída');
+      await cargar();
+    } catch (error) {
+      console.error(error);
+      toast.error('❌ Error al actualizar notificación');
     }
   };
 
@@ -44,7 +59,7 @@ export default function TablaNotificacionesTrabajador() {
               <th className="border p-2">Tipo</th>
               <th className="border p-2">Fecha</th>
               <th className="border p-2">Estado</th>
-              <th className="border p-2">Faena</th>
+              <th className="border p-2">Acción</th>
             </tr>
           </thead>
           <tbody>
@@ -62,7 +77,17 @@ export default function TablaNotificacionesTrabajador() {
                   })}
                 </td>
                 <td className="p-2">{n.leido ? '✅ Leída' : '📨 No leída'}</td>
-                <td className="p-2">{n.faena?.nombre || '—'}</td>
+                <td className="p-2">
+                  <button
+                    onClick={() => marcarLeida(n.id)}
+                    disabled={n.leido}
+                    className={`px-3 py-1 rounded text-white ${
+                      n.leido ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'
+                    }`}
+                  >
+                    {n.leido ? 'Leída' : 'Marcar como leída'}
+                  </button>
+                </td>
               </tr>
             ))}
           </tbody>
