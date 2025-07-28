@@ -164,10 +164,28 @@ export const obtenerEppAsignados = () =>
 
 
 // --- DOCUMENTOS ---
-export const obtenerDocumentos = () => handleFetch<any[]>(`${API_BASE}/documentos`);
-export const crearDocumento = (data: any) => handleFetch<any>(`${API_BASE}/documentos`, { method: 'POST', body: JSON.stringify(data) });
-export const actualizarDocumento = (id: number, data: any) => handleFetch<any>(`${API_BASE}/documentos/${id}`, { method: 'PUT', body: JSON.stringify(data) });
-export const eliminarDocumento = (id: number) => handleFetch<any>(`${API_BASE}/documentos/${id}`, { method: 'DELETE' });
+export const obtenerDocumentos = () =>
+  handleFetch<any[]>(`${API_BASE}/documentos`);
+
+export const crearDocumento = (data: any) =>
+  handleFetch<any>(`${API_BASE}/documentos`, {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+
+export const actualizarDocumento = (id: number, data: any) =>
+  handleFetch<any>(`${API_BASE}/documentos/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  });
+
+export const eliminarDocumento = (id: number) =>
+  handleFetch<any>(`${API_BASE}/documentos/${id}`, {
+    method: 'DELETE',
+  });
+
+export const obtenerDocumentoPorId = (id: number) =>
+  handleFetch<any>(`${API_BASE}/documentos/${id}`);
 
 export async function obtenerMisDocumentos() {
   return await handleFetch<Documento[]>(`${API_BASE}/documentos/mis-documentos`);
@@ -177,6 +195,7 @@ export const confirmarRecepcionDocumento = (documentoId: number) =>
   handleFetch(`${API_BASE}/documentos/recepcionar/${documentoId}`, {
     method: 'PUT',
   });
+
 
 // --- RELACIÓN DOCUMENTO - USUARIO ---
 export const asignarDocumentoAUsuario = (data: {
@@ -189,10 +208,6 @@ export const asignarDocumentoAUsuario = (data: {
     method: 'POST',
     body: JSON.stringify(data),
   });
-
-// --- Obtener documento por ID ---
-export const obtenerDocumentoPorId = (id: number) =>
-  handleFetch<any>(`${API_BASE}/documentos/${id}`);
 
 // --- NOTIFICACIONES ---
 export const obtenerNotificaciones = () => handleFetch<any[]>(`${API_BASE}/notificaciones`);
@@ -223,13 +238,10 @@ export const actualizarInspeccion = (id: number, data: any) => handleFetch<any>(
 export const eliminarInspeccion = (id: number) => handleFetch<any>(`${API_BASE}/inspecciones/${id}`, { method: 'DELETE' });
 
 
-
-
 // --- FIRMAS DIGITALES ---
 export const obtenerFirmas = () => handleFetch<any[]>(`${API_BASE}/firmas`);
 export const crearFirma = (data: any) => handleFetch<any>(`${API_BASE}/firmas`, { method: 'POST', body: JSON.stringify(data) });
 export const eliminarFirma = (id: number) => handleFetch<any>(`${API_BASE}/firmas/${id}`, { method: 'DELETE' });
-
 
 // --- FORMULARIOS ---
 export const obtenerFormularios = () => handleFetch<any[]>(`${API_BASE}/formularios`);

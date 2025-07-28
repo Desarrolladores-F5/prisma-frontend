@@ -63,6 +63,7 @@ export default function TablaFirmas() {
                 <div><strong>ID:</strong> {firma.metadata?.entidad_id || 'N/A'}</div>
                 <div><strong>Dispositivo:</strong> {firma.metadata?.dispositivo || 'N/A'}</div>
                 <div><strong>Navegador:</strong> {firma.metadata?.navegador?.substring(0, 25) || 'N/A'}...</div>
+                <div><strong>IP:</strong> {firma.metadata?.ip || 'N/A'}</div>
                 <div><strong>Fecha:</strong> {firma.metadata?.timestamp || 'N/A'}</div>
               </td>
             </tr>

@@ -3,12 +3,25 @@
 import { useState, useEffect } from 'react';
 import { crearFirma } from '@/lib/api';
 import { obtenerIdDesdeToken } from '@/lib/validate-role';
+import { toast } from 'sonner';
 
 interface Props {
-  entidadId: number;          // ID del objeto que se firma (ej. capacitación, inspección)
-  entidadTipo: string;        // Tipo de entidad firmada (ej. 'capacitacion', 'inspeccion')
-  onFirmado: () => void;      // Callback para informar que la firma fue registrada
+  entidadId: number;
+  entidadTipo: 'documento' | 'capacitacion' | string;
+  onFirmado: () => void;
 }
+
+// 🔧 Nueva función para obtener IP pública
+const obtenerIpPublica = async (): Promise<string> => {
+  try {
+    const res = await fetch('https://api.ipify.org?format=json');
+    const data = await res.json();
+    return data.ip;
+  } catch (error) {
+    console.warn('❌ No se pudo obtener IP pública:', error);
+    return 'N/A';
+  }
+};
 
 const FormularioFirma: React.FC<Props> = ({ entidadId, entidadTipo, onFirmado }) => {
   const [firmanteId, setFirmanteId] = useState<number | null>(null);
@@ -16,11 +29,7 @@ const FormularioFirma: React.FC<Props> = ({ entidadId, entidadTipo, onFirmado })
 
   useEffect(() => {
     const token = localStorage.getItem('token');
-    if (!token) {
-      console.error('❌ Token no encontrado en localStorage');
-      return;
-    }
-
+    if (!token) return;
     const idUsuario = obtenerIdDesdeToken(token);
     setFirmanteId(idUsuario);
   }, []);
@@ -31,23 +40,35 @@ const FormularioFirma: React.FC<Props> = ({ entidadId, entidadTipo, onFirmado })
     const data = encoder.encode(raw);
     const hashBuffer = await crypto.subtle.digest('SHA-256', data);
     const hashArray = Array.from(new Uint8Array(hashBuffer));
-    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    return hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
   };
 
-  const obtenerMetadata = (): object => {
-    return {
+  // 🔄 Ahora asincrónica para incluir IP
+  const obtenerMetadata = async (): Promise<Record<string, any>> => {
+    const ip = await obtenerIpPublica();
+
+    const metadataBase = {
       entidad: entidadTipo,
       entidad_id: entidadId,
       navegador: navigator.userAgent,
       dispositivo: navigator.platform,
+      ip, // ✅ Se incluye la IP
       timestamp: new Date().toISOString(),
     };
+
+    if (entidadTipo === 'documento') {
+      return {
+        ...metadataBase,
+        documento_id: entidadId,
+      };
+    }
+
+    return metadataBase;
   };
 
   const handleFirmar = async () => {
     if (firmanteId === null) {
-      console.error('❌ firmanteId no disponible');
-      alert('No se pudo obtener tu ID de usuario. Reintenta iniciar sesión.');
+      toast.error('⚠️ No se pudo obtener tu ID. Reintenta iniciar sesión.');
       return;
     }
 
@@ -55,7 +76,7 @@ const FormularioFirma: React.FC<Props> = ({ entidadId, entidadTipo, onFirmado })
 
     try {
       const hash = await generarHash();
-      const metadata = obtenerMetadata();
+      const metadata = await obtenerMetadata(); // ✅ Ahora espera la IP
 
       const firmaPayload = {
         firmante_id: firmanteId,
@@ -64,21 +85,21 @@ const FormularioFirma: React.FC<Props> = ({ entidadId, entidadTipo, onFirmado })
         metadata,
       };
 
-      console.log('📤 Enviando firma digital:', firmaPayload);
-
       await crearFirma(firmaPayload);
-      onFirmado();
+      toast.success('✅ Firma digital registrada correctamente');
+
+      onFirmado(); // Refrescar estado superior
     } catch (error) {
       console.error('❌ Error al firmar:', error);
-      alert('Ocurrió un error al registrar la firma digital.');
+      toast.error('❌ Ocurrió un error al registrar la firma digital');
     } finally {
       setProcesando(false);
     }
   };
 
   return (
-    <div className="border p-4 rounded shadow-md mt-4">
-      <h2 className="text-lg font-semibold mb-4">Firmar electrónicamente</h2>
+    <div className="border p-4 rounded shadow-sm mt-2">
+      <h2 className="text-sm font-medium mb-2">Firmar electrónicamente</h2>
       <button
         onClick={handleFirmar}
         disabled={procesando || firmanteId === null}

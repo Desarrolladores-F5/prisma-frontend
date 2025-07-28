@@ -74,7 +74,10 @@ export interface Documento {
   fecha_recepcion?: string | null;
   fecha_asignacion?: string | null;
   activo: boolean;
+  ruta_constancia_pdf?: string;
+  firmado?: boolean; // ✅ Agregado
 }
+
 
 // --- Confirmaciones de Documentos ---
 export interface ConfirmacionDocumento {

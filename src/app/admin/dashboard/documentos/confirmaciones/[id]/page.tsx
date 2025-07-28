@@ -7,15 +7,15 @@ import Link from 'next/link';
 
 interface ConfirmacionDocumento {
   id: number;
-  usuario: {
-    nombre: string;
-    apellido: string;
-    correo: string;
-  };
-  documento: {
-    nombre: string;
-  };
-  fecha_recepcion: string;
+  usuario_id: number;
+  nombre_usuario: string;
+  correo_usuario: string;
+  documento_id: number;
+  nombre_documento: string;
+  tipo_documento: string;
+  fecha_recepcion: string | null;
+  ruta_constancia_pdf?: string | null;
+  confirmado: boolean;
 }
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
@@ -32,22 +32,19 @@ export default function ConfirmacionesDocumentoPage() {
     const obtenerConfirmaciones = async () => {
       try {
         const token = localStorage.getItem('token');
-        const res = await fetch(`${BASE_URL}/api/documentos/${id}/confirmaciones`, {
+        const res = await fetch(`${BASE_URL}/api/rel-documentos-usuarios/documento/${id}/confirmaciones`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         });
 
-        if (!res.ok) {
-          throw new Error('Error al obtener confirmaciones');
-        }
+        if (!res.ok) throw new Error('Error al obtener confirmaciones');
 
         const data: ConfirmacionDocumento[] = await res.json();
         setConfirmaciones(data);
 
-        // Extraer el nombre del documento desde la primera confirmación
-        if (data.length > 0 && data[0].documento?.nombre) {
-          setNombreDocumento(data[0].documento.nombre);
+        if (data.length > 0 && data[0].nombre_documento) {
+          setNombreDocumento(data[0].nombre_documento);
         }
       } catch (error) {
         console.error('❌ Error:', error);
@@ -56,9 +53,7 @@ export default function ConfirmacionesDocumentoPage() {
       }
     };
 
-    if (id) {
-      obtenerConfirmaciones();
-    }
+    if (id) obtenerConfirmaciones();
   }, [id]);
 
   return (
@@ -86,19 +81,42 @@ export default function ConfirmacionesDocumentoPage() {
               <th className="border p-2">#</th>
               <th className="border p-2">Nombre</th>
               <th className="border p-2">Correo</th>
-              <th className="border p-2">Fecha de Confirmación</th>
+              <th className="border p-2">Confirmado</th>
+              <th className="border p-2">Fecha</th>
+              <th className="border p-2">Constancia</th>
             </tr>
           </thead>
           <tbody>
             {confirmaciones.map((conf, index) => (
               <tr key={conf.id} className="border-t text-center">
                 <td className="p-2">{index + 1}</td>
-                <td className="p-2">{conf.usuario?.nombre} {conf.usuario?.apellido}</td>
-                <td className="p-2">{conf.usuario?.correo}</td>
+                <td className="p-2">{conf.nombre_usuario}</td>
+                <td className="p-2">{conf.correo_usuario}</td>
+                <td className="p-2">
+                  {conf.confirmado ? (
+                    <span className="text-green-600 font-semibold">✅ Sí</span>
+                  ) : (
+                    <span className="text-gray-500">⏳ No</span>
+                  )}
+                </td>
                 <td className="p-2">
                   {conf.fecha_recepcion
                     ? new Date(conf.fecha_recepcion).toLocaleDateString('es-CL')
                     : '—'}
+                </td>
+                <td className="p-2">
+                  {conf.confirmado && conf.ruta_constancia_pdf ? (
+                    <a
+                      href={`${BASE_URL}${conf.ruta_constancia_pdf}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 transition-colors"
+                    >
+                      Ver PDF
+                    </a>
+                  ) : (
+                    <span className="text-gray-400 italic">Pendiente</span>
+                  )}
                 </td>
               </tr>
             ))}
