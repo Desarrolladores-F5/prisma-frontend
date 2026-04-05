@@ -11,7 +11,6 @@ export default function LoginPage() {
   const [error, setError] = useState('');
   const router = useRouter();
 
-  // Mensaje de bienvenida dinámico
   useEffect(() => {
     const hora = new Date().getHours();
     if (hora >= 6 && hora < 12) {
@@ -23,7 +22,6 @@ export default function LoginPage() {
     }
   }, []);
 
-  // Manejo de login directo al backend
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -39,11 +37,9 @@ export default function LoginPage() {
 
       if (!res.ok) throw new Error(data.mensaje || 'Error en el login');
 
-      // Guardar token y rol en localStorage
       localStorage.setItem('token', data.token);
       localStorage.setItem('rol_id', data.usuario.rol_id.toString());
 
-      // Redirigir según el rol
       switch (data.usuario.rol_id) {
         case 1:
           router.push('/admin/dashboard');
@@ -65,10 +61,18 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex flex-col justify-center items-center bg-gradient-to-br from-blue-600 to-indigo-500 px-4">
-      <div className="text-3xl font-semibold text-white mb-6 text-center">
+
+      {/* Título con efecto visual */}
+      <h1 className="text-6xl font-extrabold bg-gradient-to-r from-cyan-300 via-white to-blue-400 text-transparent bg-clip-text animate-pulse text-center mb-4">
+        PRISMA
+      </h1>
+
+      {/* Mensaje dinámico */}
+      <div className="text-2xl font-semibold text-white mb-6 text-center">
         {mensajeBienvenida}
       </div>
 
+      {/* Formulario de inicio */}
       <div className="bg-white p-8 rounded-xl shadow-xl w-full max-w-md transition-transform hover:scale-[1.02]">
         <h2 className="text-2xl font-bold text-gray-800 mb-6">Iniciar sesión</h2>
 
@@ -126,6 +130,7 @@ export default function LoginPage() {
         </form>
       </div>
 
+      {/* Footer */}
       <footer className="text-white text-sm mt-8 text-center">
         © 2025 Plataforma de Prevención de Riesgos. Todos los derechos reservados.
         <br />

@@ -79,53 +79,51 @@ export default function AdminDashboard() {
 
   if (!permitido) return null;
 
+  // Color de números alineado al header del admin
+  const accentRole: 'admin' | 'supervisor' | 'trabajador' = 'admin';
+
   return (
     <div className="space-y-6 text-sm text-gray-700">
-      <Header nombreUsuario={nombreUsuario} onLogout={cerrarSesion} />
+      <Header nombreUsuario={nombreUsuario} onLogout={cerrarSesion} rol="admin" />
 
       <div className="grid grid-cols-2 md:grid-cols-3 gap-6 mb-10">
         <Link href="/admin/dashboard/usuarios" className="block">
-          <DashboardCard title="Usuarios" value={totalUsuarios.toString()} icon="👥" />
+          <DashboardCard title="Usuarios" value={totalUsuarios.toString()} icon="👥" accentRole={accentRole} />
         </Link>
         <Link href="/admin/dashboard/reportes" className="block">
-          <DashboardCard title="Reportes" value={totalReportes.toString()} icon="📊" />
+          <DashboardCard title="Reportes" value={totalReportes.toString()} icon="📊" accentRole={accentRole} />
         </Link>
         <Link href="/admin/dashboard/auditorias" className="block">
-          <DashboardCard title="Auditorías" value={totalAuditorias.toString()} icon="📋" />
+          <DashboardCard title="Auditorías" value={totalAuditorias.toString()} icon="📋" accentRole={accentRole} />
         </Link>
         <Link href="/admin/dashboard/inspecciones" className="block">
-          <DashboardCard title="Inspecciones" value={totalInspecciones.toString()} icon="🔍" />
+          <DashboardCard title="Inspecciones" value={totalInspecciones.toString()} icon="🔍" accentRole={accentRole} />
         </Link>
         <Link href="/admin/dashboard/capacitaciones" className="block">
-          <DashboardCard title="Capacitaciones" value={totalCapacitaciones.toString()} icon="🎓" />
+          <DashboardCard title="Capacitaciones" value={totalCapacitaciones.toString()} icon="🎓" accentRole={accentRole} />
         </Link>
         <Link href="/admin/dashboard/documentos" className="block">
-          <DashboardCard title="Documentos" value={totalDocumentos.toString()} icon="📑" />
+          <DashboardCard title="Documentos" value={totalDocumentos.toString()} icon="📑" accentRole={accentRole} />
         </Link>
         <Link href="/admin/dashboard/medidas" className="block">
-          <DashboardCard title="Medidas Correctivas" value={totalMedidas.toString()} icon="🛠️" />
+          <DashboardCard title="Medidas Correctivas" value={totalMedidas.toString()} icon="🛠️" accentRole={accentRole} />
         </Link>
         <Link href="/admin/dashboard/notificaciones" className="block">
-          <DashboardCard title="Notificaciones" value={totalNotificaciones.toString()} icon="🔔" />
+          <DashboardCard title="Notificaciones" value={totalNotificaciones.toString()} icon="🔔" accentRole={accentRole} />
         </Link>
         <Link href="/admin/dashboard/epp" className="block">
-          <DashboardCard title="EPP" value={totalEPP.toString()} icon="🦺" />
+          <DashboardCard title="EPP" value={totalEPP.toString()} icon="🦺" accentRole={accentRole} />
         </Link>
         <Link href="/admin/dashboard/formularios" className="block">
-          <DashboardCard title="Formularios" value={totalFormularios.toString()} icon="📋" />
+          <DashboardCard title="Formularios" value={totalFormularios.toString()} icon="📋" accentRole={accentRole} />
         </Link>
         <Link href="/admin/dashboard/examenes" className="block">
-          <DashboardCard title="Exámenes" value={totalExamenes.toString()} icon="📝" />
+          <DashboardCard title="Exámenes" value={totalExamenes.toString()} icon="📝" accentRole={accentRole} />
         </Link>
         <Link href="/admin/dashboard/estadisticas" className="block">
-          <DashboardCard title="Estadísticas" value={totalEstadisticas.toString()} icon="📈" />
+          <DashboardCard title="Estadísticas" value={totalEstadisticas.toString()} icon="📈" accentRole={accentRole} />
         </Link>
       </div>
-
-      <SectionPlaceholder title="Auditorías recientes" />
-      <SectionPlaceholder title="Inspecciones en curso" />
-      <SectionPlaceholder title="Historial de entrega de EPP" />
-      <SectionPlaceholder title="Capacitaciones programadas" />
     </div>
   );
 }

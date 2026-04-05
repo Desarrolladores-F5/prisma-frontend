@@ -17,6 +17,7 @@ import {
 
 import DashboardCard from '@/components/ui/DashboardCard';
 import { obtenerNombreDesdeToken } from '@/lib/validate-role';
+import Header from '@/components/layout/Header';
 
 export default function DashboardSupervisor() {
   const { cerrarSesion } = useLogout();
@@ -90,24 +91,24 @@ export default function DashboardSupervisor() {
     { title: 'Notificaciones', value: data.notificaciones, icon: '🔔', link: '/supervisor/notificaciones' },
     { title: 'Documentos', value: data.documentos, icon: '📁', link: '/supervisor/documentos' },
     { title: 'Formularios', value: data.formularios, icon: '📝', link: '/supervisor/formularios' },
-  ];
+  ] as const;
+
+  // Color de números alineado al header del supervisor
+  const accentRole: 'admin' | 'supervisor' | 'trabajador' = 'supervisor';
 
   return (
-    <div>
-      <header className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Bienvenido, {nombre}</h1>
-        <button
-          onClick={cerrarSesion}
-          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
-        >
-          Cerrar sesión
-        </button>
-      </header>
+    <div className="space-y-6 text-sm text-gray-700">
+      <Header nombreUsuario={nombre ?? 'Usuario'} onLogout={cerrarSesion} rol="supervisor" />
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {tarjetas.map(({ title, value, icon, link }) => (
-          <Link href={link} key={title}>
-            <DashboardCard title={title} value={value.toString()} icon={icon} />
+          <Link href={link} key={title} className="block">
+            <DashboardCard
+              title={title}
+              value={value.toString()}
+              icon={icon}
+              accentRole={accentRole}
+            />
           </Link>
         ))}
       </div>

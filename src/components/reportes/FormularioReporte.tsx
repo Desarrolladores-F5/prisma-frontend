@@ -1,11 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import {
-  crearReporte,
-  actualizarReporte,
-  obtenerAuditorias,
-} from '@/lib/api';
+import { crearReporte, actualizarReporte } from '@/lib/api';
 import SelectFaenas from '@/components/faenas/SelectFaenas';
 import FormularioComentario from '@/components/comentarios/FormularioComentario';
 import TablaComentarios from '@/components/comentarios/TablaComentarios';
@@ -24,24 +20,15 @@ export default function FormularioReporte({ reporte, onGuardado }: Props) {
     tipo: 'Incidente',
     estado: 'Abierto',
     prioridad: 'Media',
-    faena_id: '',
-    auditoria_id: null,
+    faena_id: '',      // string para controlar el select
     fecha_evento: '',
   });
 
   const [mensaje, setMensaje] = useState('');
-  const [auditorias, setAuditorias] = useState<any[]>([]);
   const [mostrarComentarios, setMostrarComentarios] = useState(false);
   const [refrescarComentarios, setRefrescarComentarios] = useState(false);
 
   useEffect(() => {
-    const cargarDatos = async () => {
-      const dataAuditorias = await obtenerAuditorias();
-      setAuditorias(dataAuditorias);
-    };
-
-    cargarDatos();
-
     if (modoEdicion) {
       setForm({
         titulo: reporte.titulo || '',
@@ -50,13 +37,14 @@ export default function FormularioReporte({ reporte, onGuardado }: Props) {
         estado: reporte.estado || 'Abierto',
         prioridad: reporte.prioridad || 'Media',
         faena_id: reporte.faena_id?.toString() || '',
-        auditoria_id: reporte.auditoria_id?.toString() || null,
         fecha_evento: reporte.fecha_evento?.substring(0, 10) || '',
       });
     }
-  }, [reporte]);
+  }, [reporte, modoEdicion]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
+  ) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
@@ -65,8 +53,8 @@ export default function FormularioReporte({ reporte, onGuardado }: Props) {
 
     const payload = {
       ...form,
-      faena_id: parseInt(form.faena_id),
-      auditoria_id: form.auditoria_id ? parseInt(form.auditoria_id) : null,
+      faena_id: parseInt(form.faena_id, 10),
+      // auditoria_id eliminado
     };
 
     const res = modoEdicion
@@ -83,7 +71,6 @@ export default function FormularioReporte({ reporte, onGuardado }: Props) {
           estado: 'Abierto',
           prioridad: 'Media',
           faena_id: '',
-          auditoria_id: null,
           fecha_evento: '',
         });
       }
@@ -103,17 +90,36 @@ export default function FormularioReporte({ reporte, onGuardado }: Props) {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium mb-1">Título</label>
-            <input type="text" name="titulo" value={form.titulo} onChange={handleChange} required className="border p-2 rounded w-full" />
+            <input
+              type="text"
+              name="titulo"
+              value={form.titulo}
+              onChange={handleChange}
+              required
+              className="border p-2 rounded w-full"
+            />
           </div>
 
           <div>
             <label className="block text-sm font-medium mb-1">Fecha del Evento</label>
-            <input type="date" name="fecha_evento" value={form.fecha_evento} onChange={handleChange} required className="border p-2 rounded w-full" />
+            <input
+              type="date"
+              name="fecha_evento"
+              value={form.fecha_evento}
+              onChange={handleChange}
+              required
+              className="border p-2 rounded w-full"
+            />
           </div>
 
           <div>
             <label className="block text-sm font-medium mb-1">Tipo de Reporte</label>
-            <select name="tipo" value={form.tipo} onChange={handleChange} className="border p-2 rounded w-full">
+            <select
+              name="tipo"
+              value={form.tipo}
+              onChange={handleChange}
+              className="border p-2 rounded w-full"
+            >
               <option value="Incidente">Incidente</option>
               <option value="Accidente">Accidente</option>
               <option value="Observación">Observación</option>
@@ -123,7 +129,12 @@ export default function FormularioReporte({ reporte, onGuardado }: Props) {
 
           <div>
             <label className="block text-sm font-medium mb-1">Estado</label>
-            <select name="estado" value={form.estado} onChange={handleChange} className="border p-2 rounded w-full">
+            <select
+              name="estado"
+              value={form.estado}
+              onChange={handleChange}
+              className="border p-2 rounded w-full"
+            >
               <option value="Abierto">Abierto</option>
               <option value="En revisión">En revisión</option>
               <option value="Cerrado">Cerrado</option>
@@ -132,27 +143,22 @@ export default function FormularioReporte({ reporte, onGuardado }: Props) {
 
           <div>
             <label className="block text-sm font-medium mb-1">Prioridad</label>
-            <select name="prioridad" value={form.prioridad} onChange={handleChange} className="border p-2 rounded w-full">
+            <select
+              name="prioridad"
+              value={form.prioridad}
+              onChange={handleChange}
+              className="border p-2 rounded w-full"
+            >
               <option value="Alta">Alta</option>
               <option value="Media">Media</option>
               <option value="Baja">Baja</option>
             </select>
           </div>
 
+          {/* Faena */}
           <SelectFaenas value={form.faena_id} onChange={handleChange} required />
 
-          <div>
-            <label className="block text-sm font-medium mb-1">Auditoría (opcional)</label>
-            <select name="auditoria_id" value={form.auditoria_id || ''} onChange={handleChange} className="border p-2 rounded w-full">
-              <option value="">Sin auditoría</option>
-              {auditorias.map((a) => (
-                <option key={a.id} value={a.id}>
-                  {a.tipo} - {new Date(a.fecha).toLocaleDateString('es-CL')}
-                </option>
-              ))}
-            </select>
-          </div>
-
+          {/* Descripción */}
           <div className="md:col-span-2">
             <label className="block text-sm font-medium mb-1">Descripción detallada</label>
             <textarea
@@ -170,7 +176,7 @@ export default function FormularioReporte({ reporte, onGuardado }: Props) {
         </button>
       </form>
 
-      {/* ✅ Comentarios fuera del form principal */}
+      {/* Comentarios: fuera del form principal */}
       {modoEdicion && reporte?.id && (
         <div className="mt-8 p-6 bg-white rounded shadow border-t">
           <button

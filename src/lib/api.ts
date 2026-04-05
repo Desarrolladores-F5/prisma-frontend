@@ -370,7 +370,7 @@ export const obtenerComentariosPorEntidad = (
   entidadId: number
 ) =>
   handleFetch<any[]>(
-    `${API_BASE}/comentarios?entidadTipo=${entidadTipo}&entidadId=${entidadId}`
+    `${API_BASE}/comentarios/entidad/${entidadTipo}/${entidadId}`
   );
 
 export const crearComentario = (data: any) =>

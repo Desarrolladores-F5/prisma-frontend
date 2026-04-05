@@ -45,16 +45,20 @@ export default function TablaReportes({ onEditar, onEliminado, refrescar }: Prop
 
     const res = await eliminarReporte(id);
     if (res?.mensaje?.includes('eliminado')) {
-      const actualizados = reportes.filter(r => r.id !== id);
+      const actualizados = reportes.filter((r) => r.id !== id);
       setReportes(actualizados);
       onEliminado?.();
     }
   };
 
   const reportesFiltrados = reportes.filter((reporte) => {
-    const tipoMatch = filtroTipo === '' || reporte.tipo?.toLowerCase().includes(filtroTipo.toLowerCase());
-    const estadoMatch = filtroEstado === '' || reporte.estado?.toLowerCase().includes(filtroEstado.toLowerCase());
-    const faenaMatch = filtroFaena === '' || reporte.faena?.nombre?.toLowerCase().includes(filtroFaena.toLowerCase());
+    const tipoMatch =
+      filtroTipo === '' || reporte.tipo?.toLowerCase().includes(filtroTipo.toLowerCase());
+    const estadoMatch =
+      filtroEstado === '' || reporte.estado?.toLowerCase().includes(filtroEstado.toLowerCase());
+    const faenaMatch =
+      filtroFaena === '' ||
+      reporte.faena?.nombre?.toLowerCase().includes(filtroFaena.toLowerCase());
     return tipoMatch && estadoMatch && faenaMatch;
   });
 
@@ -102,8 +106,10 @@ export default function TablaReportes({ onEditar, onEliminado, refrescar }: Prop
                 <th className="p-2">Tipo</th>
                 <th className="p-2">Estado</th>
                 <th className="p-2">Faena</th>
-                <th className="p-2">Auditoría</th>
+                {/* Auditoría eliminado */}
                 <th className="p-2">Fecha</th>
+                <th className="p-2">Responsable</th>
+                <th className="p-2">Cargo</th>
                 <th className="p-2">Acciones</th>
               </tr>
             </thead>
@@ -115,12 +121,18 @@ export default function TablaReportes({ onEditar, onEliminado, refrescar }: Prop
                   <td className="p-2">{reporte.tipo}</td>
                   <td className="p-2">{reporte.estado}</td>
                   <td className="p-2">{reporte.faena?.nombre || '-'}</td>
-                  <td className="p-2">{reporte.auditoria?.tipo || '-'}</td>
+                  {/* <td className="p-2">{reporte.auditoria?.tipo || '-'}</td>  // eliminado */}
                   <td className="p-2">
                     {reporte.fecha_evento
                       ? new Date(reporte.fecha_evento).toLocaleDateString('es-CL')
                       : '-'}
                   </td>
+                  <td className="p-2">
+                    {reporte.usuario
+                      ? `${reporte.usuario.nombre} ${reporte.usuario.apellido}`
+                      : '-'}
+                  </td>
+                  <td className="p-2">{reporte.usuario?.rol?.nombre || '-'}</td>
                   <td className="p-2 space-y-1">
                     <div className="space-x-2">
                       <button
@@ -139,9 +151,9 @@ export default function TablaReportes({ onEditar, onEliminado, refrescar }: Prop
                     <div className="mt-1">
                       <Link
                         href={`/admin/dashboard/comentarios/reporte/${reporte.id}`}
-                        className="text-blue-600 hover:underline text-sm"
+                        className="inline-flex items-center gap-1 bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm transition-colors"
                       >
-                        💬 Ver Comentarios
+                        Ver Comentarios
                       </Link>
                     </div>
                   </td>

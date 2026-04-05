@@ -13,6 +13,7 @@ import {
   obtenerFormularios,
 } from '@/lib/api';
 import { obtenerNombreDesdeToken } from '@/lib/validate-role';
+import Header from '@/components/layout/Header';
 
 export default function DashboardTrabajador() {
   const { cerrarSesion } = useLogout();
@@ -71,24 +72,25 @@ export default function DashboardTrabajador() {
     { title: 'Mis Notificaciones', value: data.notificaciones, icon: '🔔', link: '/trabajador/notificaciones' },
     { title: 'Mis Documentos', value: data.documentos, icon: '📁', link: '/trabajador/documentos' },
     { title: 'Mis Formularios', value: data.formularios, icon: '📝', link: '/trabajador/formularios' },
-  ];
+  ] as const;
+
+  // Rol visual para colorear valores numéricos en las tarjetas
+  const accentRole: 'admin' | 'supervisor' | 'trabajador' = 'trabajador';
 
   return (
-    <div>
-      <header className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Bienvenido, {nombre}</h1>
-        <button
-          onClick={cerrarSesion}
-          className="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600 transition"
-        >
-          Cerrar sesión
-        </button>
-      </header>
+    <div className="space-y-6 text-sm text-gray-700">
+      {/* Header unificado con rol trabajador */}
+      <Header nombreUsuario={nombre ?? 'Trabajador'} onLogout={cerrarSesion} rol="trabajador" />
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {tarjetas.map(({ title, value, icon, link }) => (
-          <Link href={link} key={title}>
-            <DashboardCard title={title} value={value.toString()} icon={icon} />
+          <Link href={link} key={title} className="block">
+            <DashboardCard
+              title={title}
+              value={value.toString()}
+              icon={icon}
+              accentRole={accentRole}
+            />
           </Link>
         ))}
       </div>

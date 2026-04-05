@@ -1,4 +1,3 @@
-// src/app/admin/dashboard/comentarios/page.tsx
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -63,7 +62,7 @@ export default function ComentariosPage() {
           <thead className="bg-gray-100">
             <tr>
               <th className="border px-3 py-2">Autor</th>
-              <th className="border px-3 py-2">Título / Tipo</th>
+              <th className="border px-3 py-2">Título</th>
               <th className="border px-3 py-2">Acción</th>
             </tr>
           </thead>
@@ -96,12 +95,12 @@ export default function ComentariosPage() {
                 <td className="border px-3 py-2">
                   {entidadSeleccionada === 'reporte' ? item.titulo : item.tipo}
                 </td>
-                <td className="border px-3 py-2">
+                <td className="border px-3 py-2 text-center">
                   <button
                     onClick={() => manejarRedireccion(item.id)}
-                    className="text-blue-600 hover:underline text-sm"
+                    className="bg-blue-600 hover:bg-blue-700 text-white text-sm px-3 py-1 rounded"
                   >
-                    💬 Ver Comentarios
+                    Ver Comentarios
                   </button>
                 </td>
               </tr>

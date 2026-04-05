@@ -10,8 +10,7 @@ interface Documento {
   tipo: string;
   url: string;
   version: string;
-  fecha_creacion: string;
-  activo: boolean;
+  fecha_creacion: string | Date | null;
 }
 
 interface Props {
@@ -29,7 +28,7 @@ export default function TablaDocumentos({ refrescar, onEditar, onEliminado }: Pr
   const cargarDocumentos = async () => {
     try {
       const data = await obtenerDocumentos();
-      setDocumentos(data);
+      setDocumentos(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error('❌ Error al obtener documentos:', error);
     }
@@ -50,9 +49,13 @@ export default function TablaDocumentos({ refrescar, onEditar, onEliminado }: Pr
     cargarDocumentos();
   }, [refrescar]);
 
+  const fmtFecha = (f: Documento['fecha_creacion']) =>
+    f ? new Date(f).toLocaleDateString('es-CL') : '-';
+
   return (
     <div className="p-6">
       <h2 className="text-2xl font-bold mb-6">Lista de Documentos</h2>
+
       <table className="w-full border border-gray-200 text-sm">
         <thead className="bg-gray-100">
           <tr>
@@ -60,18 +63,17 @@ export default function TablaDocumentos({ refrescar, onEditar, onEliminado }: Pr
             <th className="border p-2">Tipo</th>
             <th className="border p-2">Versión</th>
             <th className="border p-2">Fecha de Creación</th>
-            <th className="border p-2">Activo</th>
             <th className="border p-2">Acciones</th>
           </tr>
         </thead>
+
         <tbody>
           {documentos.map((doc) => (
             <tr key={doc.id} className="border-t hover:bg-gray-50">
               <td className="p-2">{doc.nombre}</td>
               <td className="p-2">{doc.tipo}</td>
               <td className="p-2">{doc.version}</td>
-              <td className="p-2">{new Date(doc.fecha_creacion).toLocaleDateString('es-CL')}</td>
-              <td className="p-2 text-center">{doc.activo ? '✅' : '❌'}</td>
+              <td className="p-2">{fmtFecha(doc.fecha_creacion)}</td>
               <td className="p-2 flex flex-wrap gap-2 justify-center">
                 <a
                   href={`${BASE_URL}${doc.url}`}
@@ -115,6 +117,14 @@ export default function TablaDocumentos({ refrescar, onEditar, onEliminado }: Pr
               </td>
             </tr>
           ))}
+
+          {documentos.length === 0 && (
+            <tr>
+              <td className="p-4 text-center text-gray-500" colSpan={5}>
+                No hay documentos registrados.
+              </td>
+            </tr>
+          )}
         </tbody>
       </table>
     </div>

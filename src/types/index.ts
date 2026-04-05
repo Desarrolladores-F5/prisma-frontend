@@ -254,24 +254,26 @@ export interface Usuario {
   nombre: string;
   apellido: string;
   correo: string;
-  telefono?: string;
-  fecha_nacimiento: string;
-  fecha_contrato: string;
-  tipo_contrato: string;
+  telefono?: string | null;
+  fecha_nacimiento?: string | null;
+  fecha_contrato?: string | null;
+  tipo_contrato?: string | null;
   rol_id: number;
-  empresa_id?: number;
-  faena_id?: number;
+  empresa_id?: number | null;
+  faena_id?: number | null;
   activo: boolean;
-  fecha_creacion: string;
-  firma_imagen_url?: string;
-
+  fecha_creacion?: string | null;
+  firma_imagen_url?: string | null;
+  foto_url?: string | null;
+  contacto_emergencia_nombre?: string | null;
+  contacto_emergencia_telefono?: string | null;
   rol?: {
     id: number;
     nombre: string;
-  };
+  } | null;
   faena?: {
     id: number;
     nombre: string;
-  };
+  } | null;
 }
 
