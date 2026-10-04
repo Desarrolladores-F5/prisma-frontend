@@ -1,26 +1,29 @@
 'use client';
 
-import { useSearchParams, useRouter } from 'next/navigation';
-import { useState, useEffect } from 'react';
+import { Suspense, useEffect, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import TablaFirmas from '@/components/firmas/TablaFirmas';
 import FormularioFirma from '@/components/firmas/FormularioFirma';
 
-export default function PageFirmas() {
+function FirmasContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
   const [mostrarFormulario, setMostrarFormulario] = useState(false);
   const [refrescar, setRefrescar] = useState(false);
-
   const [entidadId, setEntidadId] = useState<number | null>(null);
-  const [entidadTipo, setEntidadTipo] = useState<string>('');
+  const [entidadTipo, setEntidadTipo] = useState('');
 
   useEffect(() => {
-    const id = searchParams?.get('entidadId');
-    const tipo = searchParams?.get('entidadTipo');
+    if (!searchParams) {
+      return;
+    }
+
+    const id = searchParams.get('entidadId');
+    const tipo = searchParams.get('entidadTipo');
 
     if (id && tipo) {
-      setEntidadId(parseInt(id));
+      setEntidadId(parseInt(id, 10));
       setEntidadTipo(tipo);
       setMostrarFormulario(true);
     }
@@ -28,7 +31,14 @@ export default function PageFirmas() {
 
   const handleFirmado = () => {
     setMostrarFormulario(false);
-    setRefrescar(!refrescar);
+    setRefrescar((valorActual) => !valorActual);
+    router.replace('/admin/dashboard/firmas');
+  };
+
+  const volverAlListado = () => {
+    setMostrarFormulario(false);
+    setEntidadId(null);
+    setEntidadTipo('');
     router.replace('/admin/dashboard/firmas');
   };
 
@@ -36,13 +46,11 @@ export default function PageFirmas() {
     <div className="p-6">
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-bold">Gestión de Firmas</h1>
+
         <div className="flex space-x-2">
           {mostrarFormulario ? (
             <button
-              onClick={() => {
-                setMostrarFormulario(false);
-                router.replace('/admin/dashboard/firmas');
-              }}
+              onClick={volverAlListado}
               className="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700"
             >
               Volver al Listado
@@ -55,6 +63,7 @@ export default function PageFirmas() {
               >
                 Volver al Inicio
               </button>
+
               <button
                 onClick={() =>
                   router.push(
@@ -70,7 +79,7 @@ export default function PageFirmas() {
         </div>
       </div>
 
-      {mostrarFormulario && entidadId && entidadTipo ? (
+      {mostrarFormulario && entidadId !== null && entidadTipo ? (
         <FormularioFirma
           entidadId={entidadId}
           entidadTipo={entidadTipo}
@@ -80,5 +89,19 @@ export default function PageFirmas() {
         <TablaFirmas key={refrescar.toString()} />
       )}
     </div>
+  );
+}
+
+export default function PageFirmas() {
+  return (
+    <Suspense
+      fallback={
+        <div className="p-6">
+          <p>Cargando gestión de firmas...</p>
+        </div>
+      }
+    >
+      <FirmasContent />
+    </Suspense>
   );
 }

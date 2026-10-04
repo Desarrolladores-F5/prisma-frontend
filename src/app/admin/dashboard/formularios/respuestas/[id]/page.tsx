@@ -5,14 +5,20 @@ import TablaRespuestasFormulario from '@/components/formularios/TablaRespuestasF
 import Link from 'next/link';
 
 export default function RespuestasFormularioPage() {
-  const { id } = useParams();
+  const params = useParams<{ id: string }>();
+  const id = params?.id;
 
-  if (!id) return <p>⚠️ ID de formulario no proporcionado.</p>;
+  if (!id) {
+    return <p>⚠️ ID de formulario no proporcionado.</p>;
+  }
 
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-4">
-        <h1 className="text-2xl font-bold">Respuestas del Formulario #{id}</h1>
+        <h1 className="text-2xl font-bold">
+          Respuestas del Formulario #{id}
+        </h1>
+
         <Link
           href="/admin/dashboard/formularios"
           className="bg-gray-700 text-white px-4 py-2 rounded hover:bg-gray-800"
@@ -21,7 +27,7 @@ export default function RespuestasFormularioPage() {
         </Link>
       </div>
 
-      <TablaRespuestasFormulario formularioId={parseInt(id as string)} />
+      <TablaRespuestasFormulario formularioId={parseInt(id, 10)} />
     </div>
   );
 }
