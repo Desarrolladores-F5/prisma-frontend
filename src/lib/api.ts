@@ -32,6 +32,47 @@ async function handleFetch<T>(url: string, options: RequestInit = {}): Promise<T
   }
 }
 
+// --- CONSTANCIAS DOCUMENTALES PROTEGIDAS ---
+export const obtenerConstanciaProtegida = async (
+  asignacionId: number
+): Promise<Blob> => {
+  if (!Number.isSafeInteger(asignacionId) || asignacionId <= 0) {
+    throw new Error('Identificador de asignación inválido.');
+  }
+
+  const token = getToken();
+
+  if (!token) {
+    throw new Error('Debes iniciar sesión para consultar la constancia.');
+  }
+
+  const respuesta = await fetch(
+    `${API_BASE}/rel-documentos-usuarios/constancias/${asignacionId}`,
+    {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      cache: 'no-store',
+    }
+  );
+
+  if (!respuesta.ok) {
+    const error = await respuesta.json().catch(() => ({}));
+    throw new Error(
+      error?.mensaje || `No fue posible obtener la constancia (${respuesta.status}).`
+    );
+  }
+
+  const tipoContenido = respuesta.headers.get('content-type') || '';
+
+  if (!tipoContenido.toLowerCase().includes('application/pdf')) {
+    throw new Error('El servidor no devolvió un documento PDF válido.');
+  }
+
+  return respuesta.blob();
+};
+
 // --- USUARIOS ---
 export const obtenerUsuarios = () => handleFetch<any[]>(`${API_BASE}/usuarios`);
 
@@ -191,10 +232,27 @@ export async function obtenerMisDocumentos() {
   return await handleFetch<Documento[]>(`${API_BASE}/documentos/mis-documentos`);
 }
 
-export const confirmarRecepcionDocumento = (documentoId: number) =>
-  handleFetch(`${API_BASE}/documentos/recepcionar/${documentoId}`, {
+export const confirmarRecepcionDocumento = (
+  documentoId: number,
+  aceptaDeclaracion: boolean
+) => {
+  if (!Number.isSafeInteger(documentoId) || documentoId <= 0) {
+    throw new Error('Identificador de documento inválido.');
+  }
+
+  if (aceptaDeclaracion !== true) {
+    throw new Error('Debes aceptar expresamente la declaración de recepción.');
+  }
+
+  return handleFetch<{
+    mensaje: string;
+    constancia_url: string;
+    ruta_constancia_pdf: string;
+  }>(`${API_BASE}/documentos/recepcionar/${documentoId}`, {
     method: 'PUT',
+    body: JSON.stringify({ acepta_declaracion: true }),
   });
+};
 
 
 // --- RELACIÓN DOCUMENTO - USUARIO ---

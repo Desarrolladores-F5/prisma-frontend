@@ -1,27 +1,17 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { obtenerMisDocumentos, crearFirma } from '@/lib/api';
+import { obtenerMisDocumentos, confirmarRecepcionDocumento, obtenerConstanciaProtegida } from '@/lib/api';
 import type { Documento } from '@/types';
 import { toast } from 'sonner';
-import { obtenerIdDesdeToken } from '@/lib/validate-role';
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-
-// 📡 Función para obtener la IP pública
-const obtenerIpPublica = async (): Promise<string> => {
-  try {
-    const res = await fetch('https://api.ipify.org?format=json');
-    const data = await res.json();
-    return data.ip;
-  } catch {
-    return 'Desconocida';
-  }
-};
 
 export default function TablaDocumentosSupervisor() {
   const [documentos, setDocumentos] = useState<Documento[]>([]);
   const [loading, setLoading] = useState(false);
+  const [aceptaciones, setAceptaciones] = useState<Record<number, boolean>>({});
+  const [confirmandoId, setConfirmandoId] = useState<number | null>(null);
 
   const cargarDocumentos = async () => {
     try {
@@ -40,79 +30,57 @@ export default function TablaDocumentosSupervisor() {
     cargarDocumentos();
   }, []);
 
-  const generarHash = async (entidadId: number, firmanteId: number): Promise<string> => {
-    const raw = `documento-${entidadId}-${firmanteId}-${new Date().toISOString()}`;
-    const encoder = new TextEncoder();
-    const data = encoder.encode(raw);
-    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-    const hashArray = Array.from(new Uint8Array(hashBuffer));
-    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  const verConstancia = async (asignacionId?: number | null) => {
+    if (!asignacionId) {
+      toast.error('No se encontró la asignación de este documento.');
+      return;
+    }
+
+    const ventana = window.open('', '_blank');
+
+    if (!ventana) {
+      toast.error('El navegador bloqueó la nueva pestaña. Permite ventanas emergentes para PRISMA.');
+      return;
+    }
+
+    try {
+      const pdf = await obtenerConstanciaProtegida(asignacionId);
+      const urlTemporal = URL.createObjectURL(pdf);
+
+      ventana.location.href = urlTemporal;
+
+      window.setTimeout(() => URL.revokeObjectURL(urlTemporal), 60000);
+    } catch (error: unknown) {
+      ventana.close();
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : 'No fue posible abrir la constancia.'
+      );
+    }
   };
 
   const confirmarRecepcion = async (documentoId: number) => {
+    if (!aceptaciones[documentoId] || confirmandoId !== null) {
+      return;
+    }
+
+    setConfirmandoId(documentoId);
+
     try {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        toast.error('Token no encontrado');
-        return;
-      }
+      await confirmarRecepcionDocumento(documentoId, true);
+      toast.success('Documento recepcionado y constancia generada correctamente.');
 
-      const firmanteId = obtenerIdDesdeToken(token);
-      if (firmanteId === null) {
-        toast.error('No se pudo obtener el ID del usuario desde el token');
-        return;
-      }
-
-      const res = await fetch(`${BASE_URL}/api/documentos/recepcionar/${documentoId}`, {
-        method: 'PUT',
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.mensaje || 'Error al confirmar recepción');
-      }
-
-      const data = await res.json();
-      const hash = await generarHash(documentoId, firmanteId);
-      const ip = await obtenerIpPublica();
-
-      const metadata = {
-        documento_id: documentoId,
-        entidad: 'documento',
-        entidad_id: documentoId,
-        navegador: navigator.userAgent,
-        dispositivo: navigator.platform,
-        ip,
-        timestamp: new Date().toISOString(),
-      };
-
-      // Registrar firma
-      await crearFirma({
-        firmante_id: firmanteId,
-        hash_firma: hash,
-        tipo_firma: 'validacion',
-        metadata,
-      });
-
-      toast.success('✅ Documento confirmado correctamente');
-
-      setDocumentos((prev) =>
-        prev.map((doc) =>
-          doc.id === documentoId
-            ? {
-                ...doc,
-                recepcionado: true,
-                fecha_recepcion: new Date().toISOString(),
-                ruta_constancia_pdf: data.ruta_constancia_pdf,
-              }
-            : doc
-        )
+      setAceptaciones((prev) => ({ ...prev, [documentoId]: false }));
+      await cargarDocumentos();
+    } catch (error: unknown) {
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : 'No fue posible confirmar la recepción del documento.'
       );
-    } catch (error: any) {
-      toast.error(`❌ ${error.message}`);
+    } finally {
+      setConfirmandoId(null);
     }
   };
 
@@ -180,24 +148,45 @@ export default function TablaDocumentosSupervisor() {
                         Confirmado
                       </span>
                       {doc.ruta_constancia_pdf && (
-                        <a
-                          href={`${BASE_URL}${doc.ruta_constancia_pdf}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
+                        <button
+                          type="button"
+                          onClick={() => verConstancia(doc.asignacion_id)}
                           className="bg-indigo-500 hover:bg-indigo-600 text-white text-xs px-3 py-1 rounded shadow transition duration-200"
                           title="Abrir constancia de recepción en PDF"
                         >
                           Ver constancia 📄
-                        </a>
+                        </button>
                       )}
                     </div>
                   ) : (
-                    <button
-                      onClick={() => confirmarRecepcion(doc.id)}
-                      className="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded"
-                    >
-                      Confirmar
-                    </button>
+                    <div className="flex flex-col items-center gap-2">
+                      <label className="flex items-start gap-2 text-left text-xs max-w-xs cursor-pointer">
+                        <input
+                          type="checkbox"
+                          className="mt-0.5"
+                          checked={aceptaciones[doc.id] === true}
+                          disabled={confirmandoId !== null}
+                          onChange={(evento) =>
+                            setAceptaciones((prev) => ({
+                              ...prev,
+                              [doc.id]: evento.target.checked,
+                            }))
+                          }
+                        />
+                        <span>
+                          Declaro que he leído y comprendido el documento,
+                          y confirmo expresamente su recepción.
+                        </span>
+                      </label>
+                      <button
+                        type="button"
+                        onClick={() => confirmarRecepcion(doc.id)}
+                        disabled={!aceptaciones[doc.id] || confirmandoId !== null}
+                        className="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {confirmandoId === doc.id ? 'Confirmando...' : 'Confirmar'}
+                      </button>
+                    </div>
                   )}
                 </td>
               </tr>

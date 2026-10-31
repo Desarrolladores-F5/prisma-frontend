@@ -64,6 +64,7 @@ export interface Comentario {
 // --- Documentos ---
 export interface Documento {
   id: number;
+  asignacion_id?: number | null;
   nombre: string;
   tipo: string;
   url: string;
@@ -74,7 +75,7 @@ export interface Documento {
   fecha_recepcion?: string | null;
   fecha_asignacion?: string | null;
   activo: boolean;
-  ruta_constancia_pdf?: string;
+  ruta_constancia_pdf?: string | null;
   firmado?: boolean; // ✅ Agregado
 }
 
