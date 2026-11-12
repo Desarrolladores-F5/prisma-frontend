@@ -1,5 +1,7 @@
 'use client';
 
+import CampanitaNotificaciones from './CampanitaNotificaciones';
+
 import Sidebar from './Sidebar';
 import ProtectedRoute from './ProtectedRoute';
 
@@ -16,6 +18,9 @@ export default function AdminLayout({ children }: Props) {
 
         {/* Main Content (sin Header aquí) */}
         <main className="flex-1 p-6 overflow-y-auto">
+          <div className="flex justify-end mb-3 relative z-20">
+            <CampanitaNotificaciones rol="admin" />
+          </div>
           {children}
         </main>
       </div>
