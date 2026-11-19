@@ -13,7 +13,7 @@ import type { Notificacion } from '@/types';
 type Rol = 'admin' | 'supervisor' | 'trabajador';
 
 interface Props {
-  rol: Rol;
+  rol: Rol | 'externo';
 }
 
 const rutas: Record<Rol, string> = {
@@ -48,7 +48,16 @@ export default function CampanitaNotificaciones({ rol }: Props) {
 
       if (solicitud !== solicitudActual.current) return;
 
-      setNotificaciones(Array.isArray(datos) ? datos : []);
+      const lista: Notificacion[] = Array.isArray(datos) ? datos : [];
+      setNotificaciones(
+        rol === 'externo'
+          ? lista.filter(n =>
+              'tipo' in n &&
+              (n.tipo === 'aprobacion_documental_externa' ||
+               n.tipo === 'rechazo_documental_externo')
+            )
+          : lista
+      );
     } catch {
       if (mostrarError && solicitud === solicitudActual.current) {
         toast.error('No fue posible cargar las notificaciones.');
@@ -58,7 +67,7 @@ export default function CampanitaNotificaciones({ rol }: Props) {
         setCargando(false);
       }
     }
-  }, []);
+  }, [rol]);
 
   useEffect(() => {
     void cargar();
@@ -231,6 +240,7 @@ export default function CampanitaNotificaciones({ rol }: Props) {
             </div>
           )}
 
+          {rol !== 'externo' && (
           <div className="sticky bottom-0 bg-white border-t border-gray-100 p-3">
             <Link
               href={rutas[rol]}
@@ -240,6 +250,7 @@ export default function CampanitaNotificaciones({ rol }: Props) {
               Ver todas las notificaciones
             </Link>
           </div>
+          )}
         </div>
       )}
     </div>

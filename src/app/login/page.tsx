@@ -50,6 +50,9 @@ export default function LoginPage() {
         case 3:
           router.push('/trabajador/dashboard');
           break;
+        case 4:
+          router.push('/empresas-externas/dashboard');
+          break;
         default:
           router.push('/acceso-denegado');
       }
