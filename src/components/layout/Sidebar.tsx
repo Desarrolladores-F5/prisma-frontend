@@ -8,6 +8,7 @@ import {
   ClipboardList,
   HardHat,
   Building,
+  Building2,
   FolderKanban,
   Search,
   GraduationCap,
@@ -49,6 +50,7 @@ const groupedLinks = [
     links: [
       { href: '/admin/dashboard/notificaciones', label: 'Notificaciones', icon: Bell },
       { href: '/admin/dashboard/documentos', label: 'Documentos', icon: File },
+      { href: '/admin/dashboard/documentos/externos', label: 'Gestión de contratistas', icon: Building2 },
       { href: '/admin/dashboard/formularios', label: 'Formularios', icon: ClipboardCheck },
       { href: '/admin/dashboard/firmas', label: 'Firmas Digitales', icon: PencilLine },
     ]

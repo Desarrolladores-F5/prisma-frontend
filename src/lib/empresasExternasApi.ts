@@ -113,6 +113,36 @@ export const obtenerMisSolicitudesDocumentalesExternas = (signal?: AbortSignal) 
     signal
   );
 
+export async function obtenerTotalEntregasPorResolver(
+  signal?: AbortSignal
+): Promise<number> {
+  const respuesta = await fetch(
+    obtenerUrlApi() + '/api/contratos-externos/entregas-por-resolver',
+    {
+      method: 'GET',
+      headers: {
+        Authorization: 'Bearer ' + obtenerToken(),
+        Accept: 'application/json',
+      },
+      cache: 'no-store',
+      signal,
+    }
+  );
+
+  await verificarRespuesta(respuesta, 'No fue posible consultar las entregas por resolver');
+
+  const datos: unknown = await respuesta.json();
+  const total = typeof datos === 'object' && datos !== null && 'total' in datos
+    ? datos.total
+    : undefined;
+
+  if (typeof total !== 'number' || !Number.isSafeInteger(total) || total < 0) {
+    throw new Error('El servidor devolvió un total de entregas inválido.');
+  }
+
+  return total;
+}
+
 export async function subirPdfSolicitudExterna(
   contratoId: number,
   requisitoId: number,

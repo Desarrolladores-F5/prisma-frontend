@@ -5,6 +5,7 @@ type AccentRole = 'admin' | 'supervisor' | 'trabajador';
 interface Props {
   title: string;
   value: string;
+  description?: string;
   icon?: string;
   /** Rol que define color de números y hover */
   accentRole?: AccentRole;
@@ -25,6 +26,7 @@ const hoverBgByRole: Record<AccentRole, string> = {
 export default function DashboardCard({
   title,
   value,
+  description,
   icon,
   accentRole = 'admin',
 }: Props) {
@@ -44,6 +46,7 @@ export default function DashboardCard({
         {icon && <span className="text-xl">{icon}</span>}
       </div>
       <p className={`text-3xl font-bold ${valueColor}`}>{value}</p>
+      {description && <p className="mt-1 text-xs text-gray-600">{description}</p>}
     </div>
   );
 }

@@ -6,6 +6,7 @@ import Link from 'next/link';
 
 import { obtenerRolDesdeToken, obtenerNombreDesdeToken } from '@/lib/validate-role';
 import { useLogout } from '@/hooks/useLogout';
+import { obtenerTotalEntregasPorResolver } from '@/lib/empresasExternasApi';
 
 import {
   obtenerTotalUsuarios,
@@ -38,6 +39,8 @@ export default function AdminDashboard() {
   const [totalAuditorias, setTotalAuditorias] = useState(0);
   const [totalCapacitaciones, setTotalCapacitaciones] = useState(0);
   const [totalDocumentos, setTotalDocumentos] = useState(0);
+  const [entregasPorResolver, setEntregasPorResolver] =
+    useState<number | 'cargando' | 'error'>('cargando');
   const [totalMedidas, setTotalMedidas] = useState(0);
   const [totalInspecciones, setTotalInspecciones] = useState(0);
   const [totalNotificaciones, setTotalNotificaciones] = useState(0);
@@ -75,6 +78,19 @@ export default function AdminDashboard() {
     obtenerTotalFormularios().then(setTotalFormularios).catch(() => setTotalFormularios(0));
     obtenerTotalExamenes().then(setTotalExamenes).catch(() => setTotalExamenes(0));
     obtenerTotalEstadisticas().then(setTotalEstadisticas).catch(() => setTotalEstadisticas(0));
+
+    const controlador = new AbortController();
+    setEntregasPorResolver('cargando');
+
+    obtenerTotalEntregasPorResolver(controlador.signal)
+      .then(total => {
+        if (!controlador.signal.aborted) setEntregasPorResolver(total);
+      })
+      .catch(() => {
+        if (!controlador.signal.aborted) setEntregasPorResolver('error');
+      });
+
+    return () => controlador.abort();
   }, [router]);
 
   if (!permitido) return null;
@@ -104,6 +120,14 @@ export default function AdminDashboard() {
         </Link>
         <Link href="/admin/dashboard/documentos" className="block">
           <DashboardCard title="Documentos" value={totalDocumentos.toString()} icon="📑" accentRole={accentRole} />
+        </Link>
+        <Link href="/admin/dashboard/documentos/externos" className="block">
+          <DashboardCard
+            title="Gestión de contratistas"
+            value={typeof entregasPorResolver === 'number' ? entregasPorResolver.toString() : '—'}
+            icon="📥"
+            accentRole={accentRole}
+          />
         </Link>
         <Link href="/admin/dashboard/medidas" className="block">
           <DashboardCard title="Medidas Correctivas" value={totalMedidas.toString()} icon="🛠️" accentRole={accentRole} />
