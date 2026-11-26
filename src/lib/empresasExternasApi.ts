@@ -16,6 +16,7 @@ export interface SolicitudDocumentalExterna {
   nombre: string;
   empresaId: number;
   mandante: string;
+  tienePlantilla: number | boolean;
   acreditacionId: number | null;
   estado: string;
   observaciones: string | null;
@@ -173,4 +174,84 @@ export async function subirPdfSolicitudExterna(
   if (respuesta.status !== 201) {
     throw new Error('No se confirmó la entrega. Actualiza la bandeja antes de volver a intentar.');
   }
+}
+
+
+export async function descargarPlantillaDocumentalExterna(
+  contratoId: number,
+  requisitoId: number
+): Promise<{ archivo: Blob; nombre: string }> {
+  if (
+    !Number.isSafeInteger(contratoId) ||
+    contratoId <= 0 ||
+    !Number.isSafeInteger(requisitoId) ||
+    requisitoId <= 0
+  ) {
+    throw new Error('Contrato o solicitud inválidos.');
+  }
+
+  const respuesta = await fetch(
+    `${obtenerUrlApi()}/api/contratos-externos/${contratoId}/requisitos/${requisitoId}/plantilla`,
+    {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${obtenerToken()}`,
+      },
+      cache: 'no-store',
+    }
+  );
+
+  await verificarRespuesta(
+    respuesta,
+    'No fue posible descargar la plantilla'
+  );
+
+  const tiposPermitidos: Record<string, string> = {
+    'application/pdf': 'pdf',
+    'application/msword': 'doc',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document': 'docx',
+  };
+
+  const tipo = (respuesta.headers.get('content-type') ?? '')
+    .split(';')[0]
+    .trim()
+    .toLowerCase();
+
+  const extension = tiposPermitidos[tipo];
+
+  if (!extension) {
+    throw new Error('El servidor devolvió un formato de archivo no permitido.');
+  }
+
+  const disposicion = respuesta.headers.get('content-disposition') ?? '';
+  let nombre = `plantilla-${requisitoId}.${extension}`;
+
+  const nombreCodificado = /filename\*=UTF-8''([^;]+)/i.exec(disposicion);
+  const nombreSimple = /filename="([^"]+)"/i.exec(disposicion);
+
+  if (nombreCodificado) {
+    try {
+      nombre = decodeURIComponent(nombreCodificado[1]);
+    } catch {
+      nombre = `plantilla-${requisitoId}.${extension}`;
+    }
+  } else if (nombreSimple) {
+    nombre = nombreSimple[1];
+  }
+
+  if (
+    nombre.length > 255 ||
+    /[\/\\\x00-\x1f\x7f]/.test(nombre) ||
+    !nombre.toLowerCase().endsWith(`.${extension}`)
+  ) {
+    nombre = `plantilla-${requisitoId}.${extension}`;
+  }
+
+  const archivo = await respuesta.blob();
+
+  if (archivo.size === 0) {
+    throw new Error('El servidor devolvió un archivo vacío.');
+  }
+
+  return { archivo, nombre };
 }

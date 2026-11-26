@@ -32,7 +32,7 @@ type AccionRevision = 'iniciar_revision' | 'aprobar' | 'rechazar';
 async function consultar(
   ruta: string,
   signal?: AbortSignal,
-  cuerpo?: { accion: AccionRevision; observaciones?: string } | { nombre: string }
+  cuerpo?: { accion: AccionRevision; observaciones?: string } | { nombre: string } | FormData
 ): Promise<Response> {
   const url = process.env.NEXT_PUBLIC_API_URL?.replace(/\/+$/, '');
   const token = localStorage.getItem('token');
@@ -41,12 +41,12 @@ async function consultar(
   if (!token) throw new Error('Inicia sesión como administrador de la mandante.');
 
   const respuesta = await fetch(`${url}/api/contratos-externos${ruta}`, {
-    method: !cuerpo ? 'GET' : 'accion' in cuerpo ? 'PATCH' : 'POST',
+    method: !cuerpo ? 'GET' : cuerpo instanceof FormData ? 'POST' : 'accion' in cuerpo ? 'PATCH' : 'POST',
     headers: {
       Authorization: 'Bearer ' + token,
-      ...(cuerpo ? { 'Content-Type': 'application/json' } : {}),
+      ...(cuerpo && !(cuerpo instanceof FormData) ? { 'Content-Type': 'application/json' } : {}),
     },
-    body: cuerpo ? JSON.stringify(cuerpo) : undefined,
+    body: cuerpo instanceof FormData ? cuerpo : cuerpo ? JSON.stringify(cuerpo) : undefined,
     cache: 'no-store',
     signal,
   });
@@ -76,6 +76,8 @@ export default function DocumentosExternosMandantePage() {
   const [errorRevision, setErrorRevision] = useState('');
   const [avisoRevision, setAvisoRevision] = useState('');
   const [nombreSolicitud, setNombreSolicitud] = useState('');
+  const [archivoSolicitud, setArchivoSolicitud] = useState<File | null>(null);
+  const [reinicioArchivo, setReinicioArchivo] = useState(0);
   const [creandoSolicitud, setCreandoSolicitud] = useState(false);
   const [errorSolicitud, setErrorSolicitud] = useState('');
   const [avisoSolicitud, setAvisoSolicitud] = useState('');
@@ -179,17 +181,46 @@ export default function DocumentosExternosMandantePage() {
     const nombre = nombreSolicitud.trim();
     if (contratoId === null || creandoSolicitud || !nombre || nombre.length > 255) return;
 
+    if (archivoSolicitud) {
+      const extensionValida = /\.(pdf|doc|docx)$/i.test(archivoSolicitud.name);
+      if (!extensionValida) {
+        setErrorSolicitud('La plantilla debe ser un archivo PDF, DOC o DOCX.');
+        return;
+      }
+
+      if (archivoSolicitud.size === 0 || archivoSolicitud.size > 10 * 1024 * 1024) {
+        setErrorSolicitud('La plantilla debe tener un tamaño mayor que cero y no superar los 10 MB.');
+        return;
+      }
+    }
+
     setCreandoSolicitud(true);
     setErrorSolicitud('');
     setAvisoSolicitud('');
 
     try {
-      const respuesta = await consultar('/' + contratoId + '/requisitos', undefined, { nombre });
+      let cuerpo: { nombre: string } | FormData = { nombre };
+
+      if (archivoSolicitud) {
+        const formulario = new FormData();
+        formulario.append('nombre', nombre);
+        formulario.append('archivo', archivoSolicitud);
+        cuerpo = formulario;
+      }
+
+      const respuesta = await consultar('/' + contratoId + '/requisitos', undefined, cuerpo);
       if (respuesta.status !== 201) {
         throw new Error('No se confirmó la creación de la solicitud.');
       }
+
       setNombreSolicitud('');
-      setAvisoSolicitud('Solicitud creada. La empresa externa ya puede verla en su portal.');
+      setArchivoSolicitud(null);
+      setReinicioArchivo(valor => valor + 1);
+      setAvisoSolicitud(
+        archivoSolicitud
+          ? 'Solicitud creada con plantilla adjunta. La empresa externa podrá descargarla desde su portal.'
+          : 'Solicitud creada. La empresa externa ya puede verla en su portal.'
+      );
     } catch (error: unknown) {
       setErrorSolicitud(error instanceof Error ? error.message : 'No se pudo crear la solicitud.');
     } finally {
@@ -278,6 +309,23 @@ export default function DocumentosExternosMandantePage() {
                 onChange={event => setNombreSolicitud(event.target.value)}
                 className="mt-1 block w-full rounded border border-gray-300 p-2"
               />
+            </label>
+            <label className="block text-sm font-medium">
+              Adjuntar plantilla (opcional)
+              <input
+                key={reinicioArchivo}
+                type="file"
+                accept=".pdf,.doc,.docx"
+                disabled={creandoSolicitud}
+                onChange={event => {
+                  setArchivoSolicitud(event.target.files?.[0] ?? null);
+                  setErrorSolicitud('');
+                }}
+                className="mt-1 block w-full rounded border border-gray-300 p-2"
+              />
+              <span className="mt-1 block text-xs text-gray-600">
+                PDF o Word (DOC/DOCX), máximo 10 MB. No es obligatorio adjuntar un archivo.
+              </span>
             </label>
             <button
               type="submit"

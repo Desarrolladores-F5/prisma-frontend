@@ -9,6 +9,7 @@ import CampanitaNotificaciones from '@/components/layout/CampanitaNotificaciones
 import {
   obtenerMisEmpresasExternas,
   obtenerMisSolicitudesDocumentalesExternas,
+  descargarPlantillaDocumentalExterna,
   subirPdfSolicitudExterna,
   type EmpresaExternaVinculada,
   type SolicitudDocumentalExterna,
@@ -30,6 +31,68 @@ type Consulta<T> =
 
 function mensajeError(error: unknown, alternativo: string) {
   return error instanceof Error ? error.message : alternativo;
+}
+
+function DescargarPlantilla({
+  solicitud,
+}: {
+  solicitud: SolicitudDocumentalExterna;
+}) {
+  const [descargando, setDescargando] = useState(false);
+  const [error, setError] = useState('');
+
+  async function descargar() {
+    if (descargando) return;
+
+    setDescargando(true);
+    setError('');
+
+    try {
+      const { archivo, nombre } = await descargarPlantillaDocumentalExterna(
+        solicitud.contratoId,
+        solicitud.id
+      );
+
+      const url = URL.createObjectURL(archivo);
+
+      try {
+        const enlace = document.createElement('a');
+        enlace.href = url;
+        enlace.download = nombre;
+        document.body.appendChild(enlace);
+
+        try {
+          enlace.click();
+        } finally {
+          enlace.remove();
+        }
+      } finally {
+        URL.revokeObjectURL(url);
+      }
+    } catch (err: unknown) {
+      setError(mensajeError(err, 'No fue posible descargar la plantilla.'));
+    } finally {
+      setDescargando(false);
+    }
+  }
+
+  return (
+    <div className="mt-3">
+      <button
+        type="button"
+        disabled={descargando}
+        onClick={() => void descargar()}
+        className="rounded-lg border border-blue-700 px-4 py-2 text-sm font-semibold text-blue-700 hover:bg-blue-50 disabled:opacity-50"
+      >
+        {descargando ? 'Descargando plantilla…' : 'Descargar plantilla'}
+      </button>
+      {error && (
+        <p role="alert" className="mt-2 text-sm text-red-800">
+          {error}
+        </p>
+      )}
+    </div>
+  );
 }
 
 function EntregarPdf({
@@ -171,6 +234,10 @@ function DocumentosSolicitados({ empresa }: { empresa: EmpresaExternaVinculada }
                   <p className="mt-3 whitespace-pre-wrap rounded-lg bg-red-50 p-3 text-sm text-red-800">
                     <strong>Motivo del rechazo:</strong> {solicitud.observaciones}
                   </p>
+                )}
+
+                {Boolean(solicitud.tienePlantilla) && (
+                  <DescargarPlantilla solicitud={solicitud} />
                 )}
 
                 {(solicitud.estado === 'pendiente_carga' || solicitud.estado === 'rechazado') && (
